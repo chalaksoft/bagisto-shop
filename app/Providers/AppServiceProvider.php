@@ -7,6 +7,7 @@ use Illuminate\Support\Facades\Artisan;
 use Illuminate\Support\Facades\ParallelTesting;
 use Illuminate\Support\Facades\Request;
 use Illuminate\Support\Facades\URL;
+use Illuminate\Support\Facades\View;
 use Illuminate\Support\ServiceProvider;
 
 class AppServiceProvider extends ServiceProvider
@@ -40,6 +41,8 @@ class AppServiceProvider extends ServiceProvider
 
         $this->registerPageBuilderStyles();
 
+        $this->registerThemeViewOverrides();
+
         ParallelTesting::setUpTestDatabase(function (string $database, int $token) {
             Artisan::call('db:seed');
         });
@@ -61,6 +64,28 @@ class AppServiceProvider extends ServiceProvider
     {
         if (str_starts_with((string) config('app.url'), 'https://')) {
             URL::forceScheme('https');
+        }
+    }
+
+    /**
+     * بازنویسی ویوهای تم فروشگاه از `resources/themes/{theme}/views`.
+     *
+     * `config/themes.php` این مسیر را به‌عنوان `views_path` تم اعلام می‌کند،
+     * ولی بجیستو فقط وقتی به فضای‌نام `shop` اضافه‌اش می‌کند که تم در دیتابیس
+     * ثبت و فعال شده باشد. روی نصب تازه این اتفاق نمی‌افتد و `shop::home.index`
+     * مستقیم به ویوی پکیج می‌رسد — نتیجه‌اش این بود که صفحهٔ اصلیِ ساخته‌شده با
+     * صفحه‌ساز نادیده گرفته می‌شد و صفحهٔ پیش‌فرض بجیستو رندر می‌شد.
+     *
+     * `prependNamespace` مسیر تم را جلوتر از پکیج می‌گذارد، پس هر ویوی موجود
+     * در تم اولویت دارد و بقیه مثل قبل از پکیج می‌آیند. `packages/Webkul` هم
+     * دست‌نخورده می‌ماند.
+     */
+    protected function registerThemeViewOverrides(): void
+    {
+        $path = base_path(config('themes.shop.default.views_path', 'resources/themes/default/views'));
+
+        if (is_dir($path)) {
+            View::prependNamespace('shop', $path);
         }
     }
 
