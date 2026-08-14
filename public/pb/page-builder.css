@@ -323,3 +323,25 @@ li { margin: .4em 0; }
     border-color: var(--pb-primary);
     color: #fff;
 }
+
+/* ── کارت‌های ویژگی صفحهٔ اصلی ───────────────────────────────────────── */
+.bs-section--head { padding-bottom: 8px; }
+.bs-section--tight { padding-top: 16px; }
+
+.bs-card {
+    background: #fff;
+    border: 1px solid var(--pb-line);
+    border-radius: var(--pb-radius);
+    padding: 26px 22px;
+    height: 100%;
+    transition: box-shadow .25s ease, transform .25s ease;
+}
+.bs-card:hover { box-shadow: var(--pb-shadow); transform: translateY(-2px); }
+.bs-card .elementor-icon-box-icon { font-size: 26px; color: var(--pb-primary); margin-bottom: 14px; }
+.bs-card .elementor-icon-box-title { font-size: 1.0625rem; margin-bottom: .4em; }
+.bs-card .elementor-icon-box-description { font-size: .9375rem; color: var(--pb-body); margin: 0; }
+
+.bs-hero .elementor-button { margin-top: 10px; }
+.bs-section--navy .elementor-button { background: #fff; color: var(--pb-ink); }
+.bs-section--navy .elementor-button:hover { background: var(--pb-cream); color: var(--pb-ink); }
+.bs-section--navy { border-radius: 0; }
