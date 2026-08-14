@@ -1,0 +1,66 @@
+/*
+ * فونت و اصلاحات سراسری فروشگاه.
+ *
+ * از قلاب `bagisto.shop.layout.head.after` در `AppServiceProvider` روی همهٔ
+ * صفحه‌های فروشگاه بار می‌شود — نه فقط صفحه‌های صفحه‌ساز. هیچ فایلی از
+ * `packages/Webkul` دست نمی‌خورد.
+ */
+
+/* وزیرمتنِ محلی؛ روی اینترنت ایران CDN قابل اتکا نیست. */
+@font-face {
+    font-family: 'Vazirmatn';
+    src: url('/pb/fonts/Vazirmatn-Regular.woff2') format('woff2');
+    font-weight: 400;
+    font-display: swap;
+}
+@font-face {
+    font-family: 'Vazirmatn';
+    src: url('/pb/fonts/Vazirmatn-Medium.woff2') format('woff2');
+    font-weight: 500 600;
+    font-display: swap;
+}
+@font-face {
+    font-family: 'Vazirmatn';
+    src: url('/pb/fonts/Vazirmatn-Bold.woff2') format('woff2');
+    font-weight: 700 800;
+    font-display: swap;
+}
+
+/*
+ * تم بجیستو فونتش را روی عنصرهای مختلف و گاهی با `!important` می‌گذارد، پس
+ * override هم باید سراسری و با همان وزن باشد. `icon-*` استثناست: فونت آیکونی
+ * خود بجیستوست و اگر عوض شود، آیکون‌ها به مربع تبدیل می‌شوند.
+ */
+body,
+button,
+input,
+select,
+textarea,
+h1, h2, h3, h4, h5, h6,
+.font-dm-serif {
+    font-family: 'Vazirmatn', -apple-system, 'Segoe UI', Tahoma, sans-serif !important;
+}
+
+[class^="icon-"],
+[class*=" icon-"],
+.material-icons,
+.fa, .fas, .far, .fab, [class^="fa-"], [class*=" fa-"] {
+    font-family: inherit;
+}
+
+[class^="icon-"]::before,
+[class*=" icon-"]::before {
+    font-family: 'bagisto-shop' !important;
+}
+
+/* اعداد فارسی در فونت وزیر کشیده‌ترند؛ کمی فاصله بهتر می‌نشیند. */
+body { letter-spacing: 0; line-height: 1.9; }
+
+/* لوگوی SVG ما پهن‌تر از لوگوی پیش‌فرض تم است و بدون این، له می‌شود. */
+header img[src*="logo"],
+.logo img,
+img[alt="بجیستو شاپ"] {
+    max-height: 42px;
+    width: auto;
+    object-fit: contain;
+}

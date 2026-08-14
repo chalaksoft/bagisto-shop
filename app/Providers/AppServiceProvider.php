@@ -6,6 +6,7 @@ use App\Http\Controllers\HomeController;
 use Barryvdh\Debugbar\Facades\Debugbar;
 use Illuminate\Foundation\Http\Middleware\PreventRequestsDuringMaintenance;
 use Illuminate\Support\Facades\Artisan;
+use Illuminate\Support\Facades\Event;
 use Illuminate\Support\Facades\ParallelTesting;
 use Illuminate\Support\Facades\Request;
 use Illuminate\Support\Facades\Route;
@@ -45,6 +46,8 @@ class AppServiceProvider extends ServiceProvider
         $this->registerHostViews();
 
         $this->registerPageBuilderStyles();
+
+        $this->registerStorefrontStyles();
 
         $this->overrideHomeRoute();
 
@@ -86,6 +89,23 @@ class AppServiceProvider extends ServiceProvider
     protected function registerHostViews(): void
     {
         View::addNamespace('host', resource_path('host-views'));
+    }
+
+    /**
+     * فونت و اصلاحات سراسری فروشگاه، روی **همهٔ** صفحه‌ها.
+     *
+     * `bagisto.shop.layout.head.after` قلاب رسمی خود بجیستو در انتهای `<head>`
+     * است، پس استایل ما بعد از استایل تم می‌نشیند و بدون `!important` جنگیدن
+     * با آن لازم نیست — هرچند فونت را تم با `!important` می‌گذارد و ما هم
+     * همان‌جا با همان وزن جوابش را می‌دهیم.
+     *
+     * این‌طور `packages/Webkul` و فایل‌های تم دست‌نخورده می‌مانند.
+     */
+    protected function registerStorefrontStyles(): void
+    {
+        Event::listen('bagisto.shop.layout.head.after', function ($event) {
+            $event->addTemplate('host::partials.storefront-styles');
+        });
     }
 
     /**
