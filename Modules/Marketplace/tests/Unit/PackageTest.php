@@ -69,6 +69,44 @@ class PackageTest extends TestCase
         Package::open($archive)->name();
     }
 
+    /**
+     * فایندر مک کنار هر فایل یک AppleDouble می‌گذارد و پوشهٔ `__MACOSX/` را در
+     * ریشه اضافه می‌کند. بدون این تست، هر بسته‌ای که با «Compress» فایندر ساخته
+     * شود با «بیش از یک پوشه در ریشه» رد می‌شود.
+     */
+    public function test_mac_metadata_does_not_count_as_a_second_root(): void
+    {
+        $package = Package::open($this->makeZip('Demo', [
+            'Demo/module.json'               => json_encode(['name' => 'Demo', 'version' => '1.0.0']),
+            'Demo/ModuleServiceProvider.php' => '<?php',
+            '__MACOSX/._Demo'                => 'apple double',
+            '__MACOSX/Demo/._module.json'    => 'apple double',
+            'Demo/.DS_Store'                 => 'finder junk',
+            'Demo/._helper.php'              => 'apple double',
+        ]));
+
+        $this->assertSame('Demo', $package->name());
+    }
+
+    public function test_mac_metadata_is_not_written_to_disk(): void
+    {
+        $package = Package::open($this->makeZip('Demo', [
+            'Demo/module.json'               => json_encode(['name' => 'Demo', 'version' => '1.0.0']),
+            'Demo/ModuleServiceProvider.php' => '<?php',
+            'Demo/helper.php'                => '<?php',
+            '__MACOSX/Demo/._module.json'    => 'apple double',
+            'Demo/._helper.php'              => 'apple double',
+            'Demo/.DS_Store'                 => 'finder junk',
+        ]));
+
+        $path = $package->extractTo($this->workspace.'/out');
+
+        $this->assertFileExists($path.'/helper.php');
+        $this->assertDirectoryDoesNotExist($this->workspace.'/out/__MACOSX');
+        $this->assertFileDoesNotExist($path.'/._helper.php');
+        $this->assertFileDoesNotExist($path.'/.DS_Store');
+    }
+
     public function test_more_than_one_root_directory_is_rejected(): void
     {
         $archive = $this->makeZip('Demo', [

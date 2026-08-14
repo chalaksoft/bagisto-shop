@@ -184,7 +184,22 @@ class Package
 
         $zip = $this->archive();
 
-        $extracted = $zip->extractTo($destination);
+        /**
+         * فقط ورودی‌های واقعی استخراج می‌شوند. اگر فهرست را ندهیم،
+         * `extractTo()` فراداده‌های مک (`__MACOSX/`، `._*`) را هم روی دیسک
+         * می‌ریزد و پوشهٔ ماژول را با آشغال پر می‌کند.
+         */
+        $entries = [];
+
+        for ($index = 0; $index < $zip->numFiles; $index++) {
+            $entry = $zip->getNameIndex($index);
+
+            if ($entry !== false && ! static::isMetadata($entry)) {
+                $entries[] = $entry;
+            }
+        }
+
+        $extracted = $zip->extractTo($destination, $entries);
 
         $zip->close();
 
@@ -235,6 +250,15 @@ class Package
             }
 
             $name = $stat['name'];
+
+            /**
+             * فراداده‌های مک نه شمرده می‌شوند نه استخراج. بدون این، هر zip
+             * ساخته‌شده با «Compress» فایندر رد می‌شد، چون `__MACOSX/` را
+             * پوشهٔ دوم ریشه می‌دیدیم.
+             */
+            if (static::isMetadata($name)) {
+                continue;
+            }
 
             if (str_contains($name, "\0") || str_contains($name, '\\') || str_starts_with($name, '/')) {
                 $zip->close();
@@ -287,6 +311,28 @@ class Package
         }
 
         return $root;
+    }
+
+    /**
+     * ورودی‌هایی که فراداده‌اند، نه کد.
+     *
+     * فایندر مک کنار هر فایل یک «AppleDouble» می‌گذارد: پوشهٔ `__MACOSX/` در
+     * ریشه و فایل‌های `._نام`. ویندوز و بعضی ابزارها هم `.DS_Store` و
+     * `Thumbs.db` را با خودشان می‌آورند. هیچ‌کدام بخشی از ماژول نیستند و نه
+     * باید اعتبارسنجی را بشکنند نه روی دیسک بنشینند.
+     */
+    protected static function isMetadata(string $entry): bool
+    {
+        $segments = explode('/', trim($entry, '/'));
+
+        if (($segments[0] ?? null) === '__MACOSX') {
+            return true;
+        }
+
+        $basename = end($segments) ?: '';
+
+        return str_starts_with($basename, '._')
+            || in_array($basename, ['.DS_Store', 'Thumbs.db', 'desktop.ini'], true);
     }
 
     protected function archive(): ZipArchive
