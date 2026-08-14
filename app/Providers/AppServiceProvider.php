@@ -38,6 +38,8 @@ class AppServiceProvider extends ServiceProvider
     {
         $this->forceHttpsWhenConfigured();
 
+        $this->registerPageBuilderStyles();
+
         ParallelTesting::setUpTestDatabase(function (string $database, int $token) {
             Artisan::call('db:seed');
         });
@@ -60,5 +62,26 @@ class AppServiceProvider extends ServiceProvider
         if (str_starts_with((string) config('app.url'), 'https://')) {
             URL::forceScheme('https');
         }
+    }
+
+    /**
+     * پایهٔ ظاهری صفحه‌های ساخته‌شده با صفحه‌ساز.
+     *
+     * قالب رندر صفحه‌ساز یک لایهٔ مستقل است و فقط CSS خود Elementor را بار
+     * می‌کند — نه فونت، نه ریست، نه تایپوگرافی. `elementor.extra_styles` قلاب
+     * رسمی خود هسته برای همین کار است، پس هیچ فایلی از `Modules/Elementor`
+     * دست نمی‌خورد.
+     *
+     * اگر ماژول صفحه‌ساز نصب نباشد، این کلید را کسی نمی‌خواند و گذاشتنش
+     * بی‌ضرر است.
+     */
+    protected function registerPageBuilderStyles(): void
+    {
+        config([
+            'elementor.extra_styles' => array_values(array_unique(array_merge(
+                (array) config('elementor.extra_styles', []),
+                ['/css/page-builder.css'],
+            ))),
+        ]);
     }
 }
