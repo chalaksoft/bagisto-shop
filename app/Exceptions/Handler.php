@@ -34,9 +34,34 @@ class Handler extends BaseHandler
     {
         $this->ensureThemeIsSet();
 
+        $this->handleExpiredSession();
+
         $this->keepClientErrorStatus();
 
         parent::register();
+    }
+
+    /**
+     * نشست منقضی (۴۱۹) خطای صفحه نیست، یک «دوباره بفرست» است.
+     *
+     * پیام «۴۰۴ صفحه پیدا نشد» برای این حالت گمراه‌کننده است: آدرس درست بوده و
+     * فقط توکن فرم کهنه شده — معمولاً چون تب ساعت‌ها باز مانده.
+     */
+    protected function handleExpiredSession(): void
+    {
+        $this->renderable(function (HttpException $exception, Request $request) {
+            if ($exception->getStatusCode() !== 419) {
+                return null;
+            }
+
+            $message = 'نشست شما منقضی شده بود؛ صفحه را تازه کنید و دوباره تلاش کنید.';
+
+            if ($request->wantsJson()) {
+                return response()->json(['error' => 'نشست منقضی', 'description' => $message], 419);
+            }
+
+            return redirect()->back()->with('error', $message);
+        });
     }
 
     /**
