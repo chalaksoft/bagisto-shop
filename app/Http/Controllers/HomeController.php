@@ -32,15 +32,7 @@ class HomeController extends BagistoHomeController
             return parent::index();
         }
 
-        return view('host::home.page-builder', [
-            'embed'   => $embed,
-            'channel' => core()->getCurrentChannel(),
-            /**
-             * نوار ادمین «ویرایش این صفحه» را فقط وقتی نشان می‌دهیم که ویوی
-             * ماژول واقعاً موجود باشد؛ نبودش نباید صفحهٔ اصلی را بشکند.
-             */
-            'showAdminBar' => View::exists('Elementor::parts.admin-bar'),
-        ]);
+        return $this->renderDocument($embed);
     }
 
     /**
@@ -61,8 +53,28 @@ class HomeController extends BagistoHomeController
 
         abort_if(! $embed, 404);
 
+        return $this->renderDocument($embed);
+    }
+
+    /**
+     * رندر سند همراه هدر و فوترِ صفحه‌ساز.
+     *
+     * `renderDocumentParts` هدر و فوتر انتخاب‌شده در تنظیمات صفحه‌ساز را
+     * می‌سازد و آدرس CSS تولیدی‌شان را هم برمی‌گرداند؛ همان چیزی که بلاگ هم
+     * استفاده می‌کند.
+     */
+    protected function renderDocument(array $embed)
+    {
+        $document = $embed['document'];
+
+        $parts = (new \Modules\Elementor\Support\Renderer())->renderDocumentParts($document);
+
         return view('host::home.page-builder', [
-            'embed'        => $embed,
+            'document'     => $document,
+            'html'         => $embed['html'],
+            'header_html'  => $parts['header_html'] ?? '',
+            'footer_html'  => $parts['footer_html'] ?? '',
+            'css_links'    => array_merge((array) ($embed['css'] ?? []), (array) ($parts['css_links'] ?? [])),
             'channel'      => core()->getCurrentChannel(),
             'showAdminBar' => View::exists('Elementor::parts.admin-bar'),
         ]);

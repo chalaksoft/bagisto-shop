@@ -64,3 +64,66 @@ img[alt="بجیستو شاپ"] {
     width: auto;
     object-fit: contain;
 }
+
+/* ── هدر و فوتر صفحه‌ساز ─────────────────────────────────────────────
+ * هدر و فوتر اسناد صفحه‌ساز‌ند (نه ویوی تم)، پس چیدمانشان هم اینجاست.
+ */
+.bs-header {
+    background: #fff;
+    border-bottom: 1px solid var(--pb-line, #E4E7F2);
+    padding: 14px 0;
+    position: sticky;
+    top: 0;
+    z-index: 40;
+    backdrop-filter: saturate(140%) blur(6px);
+}
+.bs-header .elementor-container { align-items: center; }
+.bs-header .bs-logo img { max-height: 44px; width: auto; }
+
+.bs-nav ul, .bs-foot-nav ul { list-style: none; margin: 0; padding: 0; display: flex; gap: 26px; }
+.bs-nav ul { justify-content: center; }
+.bs-nav a, .bs-foot-nav a {
+    color: var(--pb-ink, #0A0E2E);
+    font-weight: 500;
+    font-size: .9688rem;
+    position: relative;
+    padding-bottom: 3px;
+}
+.bs-nav a::after {
+    content: '';
+    position: absolute;
+    inset-inline-start: 0;
+    bottom: 0;
+    width: 0;
+    height: 2px;
+    border-radius: 2px;
+    background: linear-gradient(90deg, var(--pb-primary, #3D5AFE), var(--pb-violet, #7C4DFF));
+    transition: width .25s ease;
+}
+.bs-nav a:hover { color: var(--pb-primary, #3D5AFE); }
+.bs-nav a:hover::after { width: 100%; }
+
+.bs-header-cta .elementor-button { padding: 10px 22px; font-size: .9375rem; }
+
+@media (max-width: 880px) {
+    .bs-header { position: static; }
+    .bs-nav ul { flex-wrap: wrap; justify-content: center; gap: 14px 20px; }
+    .bs-header-cta { text-align: center; }
+}
+
+.bs-footer {
+    background: var(--pb-ink, #0A0E2E);
+    color: #C7CCE4;
+    padding: 48px 0 24px;
+}
+.bs-footer h1, .bs-footer h2, .bs-footer h3, .bs-footer h4 { color: #fff; font-size: 1rem; margin-bottom: .8em; }
+.bs-footer p { color: #A8AFCC; font-size: .9375rem; line-height: 2; }
+.bs-footer img { filter: brightness(0) invert(1); opacity: .92; }
+.bs-foot-nav ul { flex-direction: column; gap: 10px; }
+.bs-footer a { color: #C7CCE4; }
+.bs-footer a:hover { color: #fff; }
+.bs-footer--bottom {
+    padding: 16px 0 20px;
+    border-top: 1px solid rgba(255, 255, 255, .1);
+}
+.bs-footer--bottom p { margin: 0; font-size: .875rem; color: #8B93B5; }

@@ -1,41 +1,60 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="csrf-token" content="{{ csrf_token() }}">
+
+    <title>{{ $document->seo_title ?: ($channel->home_seo['meta_title'] ?? $channel->name) }}</title>
+
+    <meta name="description" content="{{ $document->seo_description ?: ($channel->home_seo['meta_description'] ?? '') }}">
+
+    @if ($channel->logo)
+        <link rel="icon" href="{{ Storage::url($channel->logo) }}">
+    @endif
+
+    {{-- CSS خود موتور صفحه‌ساز + پایهٔ ظاهری ما (`elementor.extra_styles`). --}}
+    {!! \Modules\Elementor\Support\Assets::styleTags() !!}
+
+    {{-- CSS تولیدشدهٔ خود سند و بخش‌های هدر/فوتر. --}}
+    @foreach ($css_links ?? [] as $href)
+        <link rel="stylesheet" href="{{ $href }}">
+    @endforeach
+
+    <link rel="stylesheet" href="{{ asset('pb/site.css') }}">
+
+    @vite(['Modules/Elementor/resources/js/front.js'])
+</head>
+
 {{--
-    صفحهٔ اصلیِ چیده‌شده با صفحه‌ساز، داخل قالب فروشگاه.
+    هدر و فوتر هم اسناد صفحه‌ساز‌ند، نه ویوی تم.
 
-    عمداً در `resources/views` است نه در پوشهٔ تم: بجیستو ویوهای تم را برای
-    جایگزینی ویوهای پکیج نمی‌خواند، ولی فضای‌نام پیش‌فرض اپ همیشه در دسترس است.
+    برای همین این صفحه داخل `<x-shop::layouts>` نمی‌نشیند: آن قالب هدر و فوتر
+    خودِ بجیستو را می‌آورد و آن‌وقت دو هدر روی هم می‌افتاد. `SiteParts` همان
+    مکانیزمی است که هستهٔ صفحه‌ساز برای این کار دارد و بلاگ هم از آن استفاده
+    می‌کند.
+
+    میان‌افزار `shop` همچنان روی روت هست، پس کانال، زبان، ارز و سبد خرید در
+    دسترس‌اند و ویجت‌های فروشگاهی (سبد، جست‌وجو) کار می‌کنند.
 --}}
-@push('meta')
-    <meta name="title" content="{{ $channel->home_seo['meta_title'] ?? '' }}" />
+<body style="margin:0" class="{{ \Modules\Elementor\Support\SiteParts::bodyClasses($document) }}">
 
-    <meta name="description" content="{{ $channel->home_seo['meta_description'] ?? '' }}" />
+@if ($showAdminBar)
+    @include('Elementor::parts.admin-bar', [
+        'barDocumentId' => $document->id,
+        'barDocument'   => $document,
+    ])
+@endif
 
-    <meta name="keywords" content="{{ $channel->home_seo['meta_keywords'] ?? '' }}" />
+{!! $header_html ?? '' !!}
 
-    {{--
-        CSS اختصاصی سند. ساختارش آرایه است نه رشته، پس با پارشال خود ماژول
-        رندر می‌شود — همان چیزی که قالب‌های صفحه‌ساز هم استفاده می‌کنند.
-    --}}
-    @if (! empty($embed['css']) && view()->exists('ElementorBagisto::parts.embed-head'))
-        @include('ElementorBagisto::parts.embed-head', ['eeCss' => $embed['css']])
-    @endif
+{!! $html !!}
 
-    {{--
-        پایهٔ ظاهری صفحه‌ساز (`elementor.extra_styles`) را همان پارشال بالا
-        بار می‌کند؛ تکرارش اینجا فقط یک لینک اضافه در head می‌ساخت.
-    --}}
-@endpush
+{!! $footer_html ?? '' !!}
 
-<x-shop::layouts>
-    <x-slot:title>
-        {{ $channel->home_seo['meta_title'] ?? $channel->name }}
-    </x-slot>
+@if ($document->custom_js)
+    <script>{!! $document->custom_js !!}</script>
+@endif
 
-    @if ($showAdminBar)
-        @include('Elementor::parts.admin-bar', [
-            'barDocumentId' => $embed['document']->id,
-            'barDocument'   => $embed['document'],
-        ])
-    @endif
-
-    {!! $embed['html'] !!}
-</x-shop::layouts>
+</body>
+</html>
