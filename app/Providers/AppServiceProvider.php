@@ -10,6 +10,7 @@ use Illuminate\Support\Facades\ParallelTesting;
 use Illuminate\Support\Facades\Request;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Facades\URL;
+use Illuminate\Support\Facades\View;
 use Illuminate\Support\ServiceProvider;
 
 class AppServiceProvider extends ServiceProvider
@@ -41,6 +42,8 @@ class AppServiceProvider extends ServiceProvider
     {
         $this->forceHttpsWhenConfigured();
 
+        $this->registerHostViews();
+
         $this->registerPageBuilderStyles();
 
         $this->overrideHomeRoute();
@@ -67,6 +70,18 @@ class AppServiceProvider extends ServiceProvider
         if (str_starts_with((string) config('app.url'), 'https://')) {
             URL::forceScheme('https');
         }
+    }
+
+    /**
+     * ویوهای خود اپ را زیر فضای‌نام `host::` در دسترس نگه دار.
+     *
+     * میان‌افزار `shop` بجیستو مسیرهای پایهٔ view finder را با مسیرهای تم
+     * عوض می‌کند، پس `view('home.page-builder')` داخل روت‌های فروشگاه پیدا
+     * نمی‌شود. فضای‌نام‌ها از این جابه‌جایی مصون‌اند.
+     */
+    protected function registerHostViews(): void
+    {
+        View::addNamespace('host', resource_path('views'));
     }
 
     /**

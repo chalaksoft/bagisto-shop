@@ -32,7 +32,7 @@ class HomeController extends BagistoHomeController
             return parent::index();
         }
 
-        return view('home.page-builder', [
+        return view('host::home.page-builder', [
             'embed'   => $embed,
             'channel' => core()->getCurrentChannel(),
             /**
