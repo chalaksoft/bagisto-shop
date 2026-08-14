@@ -2,8 +2,10 @@
 
 namespace App\Providers;
 
+use App\Exceptions\Handler;
 use App\Http\Controllers\HomeController;
 use Barryvdh\Debugbar\Facades\Debugbar;
+use Illuminate\Contracts\Debug\ExceptionHandler;
 use Illuminate\Foundation\Http\Middleware\PreventRequestsDuringMaintenance;
 use Illuminate\Support\Facades\Artisan;
 use Illuminate\Support\Facades\Event;
@@ -41,6 +43,8 @@ class AppServiceProvider extends ServiceProvider
      */
     public function boot(): void
     {
+        $this->useOwnExceptionHandler();
+
         $this->forceHttpsWhenConfigured();
 
         $this->registerHostViews();
@@ -68,6 +72,21 @@ class AppServiceProvider extends ServiceProvider
      * پیکربندی وب‌سرور راه دیگرش است، ولی روی هاست اشتراکی دست کاربر نیست؛
      * `APP_URL` هست.
      */
+    /**
+     * هندلر خطای خودمان جای هندلر بجیستو.
+     *
+     * بجیستو در `CoreServiceProvider::register()` هندلرش را bind می‌کند، پس
+     * کال‌بک‌های `withExceptions()` در `bootstrap/app.php` هیچ‌وقت اجرا
+     * نمی‌شوند. bind دوباره در `boot()` انجام می‌شود تا بعد از register همهٔ
+     * پرووایدرها بنشیند؛ هندلر تازه وقت اولین استثنا resolve می‌شود.
+     *
+     * @see \App\Exceptions\Handler
+     */
+    protected function useOwnExceptionHandler(): void
+    {
+        $this->app->bind(ExceptionHandler::class, Handler::class);
+    }
+
     protected function forceHttpsWhenConfigured(): void
     {
         if (str_starts_with((string) config('app.url'), 'https://')) {

@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Middleware\CanInstall;
 use App\Http\Middleware\EncryptCookies;
 use Illuminate\Console\Scheduling\Schedule;
 use Illuminate\Cookie\Middleware\EncryptCookies as BaseEncryptCookies;
@@ -9,7 +10,6 @@ use Illuminate\Foundation\Configuration\Middleware;
 use Illuminate\Foundation\Http\Middleware\ConvertEmptyStringsToNull;
 use Illuminate\Foundation\Http\Middleware\PreventRequestsDuringMaintenance;
 use Webkul\Core\Http\Middleware\SecureHeaders;
-use Webkul\Installer\Http\Middleware\CanInstall;
 
 return Application::configure(basePath: dirname(__DIR__))
     ->withRouting(
@@ -34,6 +34,12 @@ return Application::configure(basePath: dirname(__DIR__))
         $middleware->remove(ConvertEmptyStringsToNull::class);
 
         $middleware->append(SecureHeaders::class);
+
+        /**
+         * نسخهٔ خودمان از `CanInstall`: اصلی هر آدرسی را که `/install` در آن
+         * باشد مال نصب‌کننده می‌داند و مثلاً دکمهٔ نصب ماژول را به صفحهٔ اصلی
+         * ریدایرکت می‌کند.
+         */
         $middleware->append(CanInstall::class);
 
         /**
@@ -44,6 +50,12 @@ return Application::configure(basePath: dirname(__DIR__))
     ->withSchedule(function (Schedule $schedule) {
         //
     })
+    /**
+     * اینجا خالی است چون بجیستو در `CoreServiceProvider` هندلر خودش را
+     * bind می‌کند و کال‌بک‌های اینجا اصلاً اجرا نمی‌شوند.
+     *
+     * @see \App\Exceptions\Handler
+     */
     ->withExceptions(function (Exceptions $exceptions) {
         //
     })->create();
