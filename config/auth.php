@@ -72,7 +72,14 @@ return [
 
         'admins' => [
             'driver' => 'eloquent',
-            'model'  => Webkul\User\Models\Admin::class,
+            /**
+             * قرارداد میزبان برای ماژول‌های صفحه‌ساز و بلاگ: آن‌ها نویسندهٔ
+             * نوشته و کاربر نوار ادمین را `App\Model\User` می‌شناسند.
+             * این کلاس خودش از `Webkul\User\Models\Admin` ارث می‌برد و فقط
+             * `full_name` و `avatar` را رویش نگاشت می‌کند، پس رفتار بجیستو
+             * عوض نمی‌شود.
+             */
+            'model'  => App\Model\User::class,
         ],
     ],
 
