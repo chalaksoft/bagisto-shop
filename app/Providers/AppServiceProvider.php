@@ -6,6 +6,7 @@ use Barryvdh\Debugbar\Facades\Debugbar;
 use Illuminate\Support\Facades\Artisan;
 use Illuminate\Support\Facades\ParallelTesting;
 use Illuminate\Support\Facades\Request;
+use Illuminate\Support\Facades\URL;
 use Illuminate\Support\ServiceProvider;
 
 class AppServiceProvider extends ServiceProvider
@@ -35,8 +36,29 @@ class AppServiceProvider extends ServiceProvider
      */
     public function boot(): void
     {
+        $this->forceHttpsWhenConfigured();
+
         ParallelTesting::setUpTestDatabase(function (string $database, int $token) {
             Artisan::call('db:seed');
         });
+    }
+
+    /**
+     * وقتی `APP_URL` با https شروع می‌شود، آدرس‌های تولیدشده هم https باشند.
+     *
+     * پشت nginx + php-fpm، اگر وب‌سرور `HTTPS=on` را به PHP پاس ندهد، لاراول
+     * ریکوئست را http می‌بیند و همهٔ آدرس‌ها را با `http://` می‌سازد. صفحه روی
+     * https سرو می‌شود ولی CSS و JS با http صدا زده می‌شوند و مرورگر به‌عنوان
+     * mixed content بلاکشان می‌کند — نتیجه‌اش سایتی است بدون هیچ استایلی که
+     * شبیه خرابی نصب به نظر می‌رسد و نیست.
+     *
+     * پیکربندی وب‌سرور راه دیگرش است، ولی روی هاست اشتراکی دست کاربر نیست؛
+     * `APP_URL` هست.
+     */
+    protected function forceHttpsWhenConfigured(): void
+    {
+        if (str_starts_with((string) config('app.url'), 'https://')) {
+            URL::forceScheme('https');
+        }
     }
 }
