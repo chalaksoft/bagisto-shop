@@ -17,6 +17,8 @@
         id="marketplace-progress"
         data-advance="{{ route('admin.marketplace.advance', $run->id) }}"
         data-status="{{ $run->status }}"
+        {{-- چیدمان ادمین بجیستو متای `csrf-token` ندارد، پس توکن از همین‌جا می‌آید. --}}
+        data-token="{{ csrf_token() }}"
     >
         <ol class="grid gap-3">
             @foreach ($steps as $key => $label)
@@ -52,7 +54,7 @@
                 const message = root.querySelector('[data-message]');
                 const error   = root.querySelector('[data-error]');
                 const back    = root.querySelector('[data-back]');
-                const token   = document.querySelector('meta[name="csrf-token"]')?.content;
+                const token   = root.dataset.token;
 
                 const items = Array.from(root.querySelectorAll('[data-step]'));
 
@@ -91,6 +93,12 @@
                     back.classList.remove('hidden');
                 }
 
+                function stop(text) {
+                    error.textContent = text;
+                    error.classList.remove('hidden');
+                    back.classList.remove('hidden');
+                }
+
                 function advance() {
                     fetch(root.dataset.advance, {
                         method: 'POST',
@@ -100,7 +108,22 @@
                             'Accept': 'application/json',
                         },
                     })
-                        .then(function (response) { return response.json(); })
+                        .then(function (response) {
+                            /**
+                             * بدون این بررسی، هر پاسخ خطا هم «مرحلهٔ بعدی» حساب
+                             * می‌شد و حلقه تا ابد همان خطا را دوباره می‌گرفت.
+                             */
+                            if (! response.ok) {
+                                return response.json().catch(function () { return {}; }).then(function (body) {
+                                    throw new Error(
+                                        body.description || body.error || body.message
+                                            || ('سرور با کد ' + response.status + ' پاسخ داد.')
+                                    );
+                                });
+                            }
+
+                            return response.json();
+                        })
                         .then(function (payload) {
                             if (payload.finished) {
                                 paint(null);
@@ -115,10 +138,11 @@
 
                             advance();
                         })
-                        .catch(function () {
-                            error.textContent = 'ارتباط با سرور قطع شد. صفحه را دوباره باز کنید؛ نصب از همین مرحله ادامه پیدا می‌کند.';
-                            error.classList.remove('hidden');
-                            back.classList.remove('hidden');
+                        .catch(function (exception) {
+                            stop(
+                                (exception && exception.message ? exception.message + ' ' : '')
+                                + 'صفحه را دوباره باز کنید؛ نصب از همین مرحله ادامه پیدا می‌کند.'
+                            );
                         });
                 }
 
