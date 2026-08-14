@@ -75,13 +75,17 @@ class AppServiceProvider extends ServiceProvider
     /**
      * ویوهای خود اپ را زیر فضای‌نام `host::` در دسترس نگه دار.
      *
-     * میان‌افزار `shop` بجیستو مسیرهای پایهٔ view finder را با مسیرهای تم
-     * عوض می‌کند، پس `view('home.page-builder')` داخل روت‌های فروشگاه پیدا
-     * نمی‌شود. فضای‌نام‌ها از این جابه‌جایی مصون‌اند.
+     * دو دلیل دارد. یک: میان‌افزار `shop` بجیستو مسیرهای پایهٔ view finder را
+     * با مسیرهای تم عوض می‌کند، پس `view('home.page-builder')` داخل روت‌های
+     * فروشگاه پیدا نمی‌شود و فضای‌نام‌ها از این جابه‌جایی مصون‌اند.
+     *
+     * دو: پوشه عمداً `host-views` است نه `views` — بجیستو در
+     * `resources/views/.gitignore` همه‌چیز را کنار می‌گذارد و هر ویویی که
+     * آنجا بگذاریم اصلاً کامیت نمی‌شود.
      */
     protected function registerHostViews(): void
     {
-        View::addNamespace('host', resource_path('views'));
+        View::addNamespace('host', resource_path('host-views'));
     }
 
     /**
