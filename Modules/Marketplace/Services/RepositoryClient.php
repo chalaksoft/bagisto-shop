@@ -6,6 +6,7 @@ use Illuminate\Http\Client\PendingRequest;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Str;
+use Modules\Marketplace\Model\RepositoryCredential;
 use Throwable;
 use Webkul\Core\Core;
 
@@ -33,7 +34,104 @@ class RepositoryClient
 
     public function hasToken(): bool
     {
-        return filled(config('marketplace.token'));
+        return filled($this->token());
+    }
+
+    /**
+     * توکنی که در هدر `Authorization` می‌رود.
+     *
+     * ثبت‌نام مقدم بر `.env` است: `MARKETPLACE_TOKEN` معمولاً از یک نصب قدیمی
+     * یا فایل کپی‌شده مانده و ممکن است اصلاً روی این مخزن وجود نداشته باشد؛
+     * اگر مقدم می‌شد، ادمین بعد از ثبت‌نام موفق باز هم «لایسنس معتبر نیست»
+     * می‌دید و راهی هم برای درستش‌کردن بدون SSH نداشت.
+     */
+    public function token(): ?string
+    {
+        return $this->credential()?->token ?: ((string) config('marketplace.token') ?: null);
+    }
+
+    /** توکن از `.env` آمده یا از ثبت‌نام؟ */
+    public function tokenFromEnv(): bool
+    {
+        return ! $this->credential() && filled(config('marketplace.token'));
+    }
+
+    public function credential(): ?RepositoryCredential
+    {
+        return RepositoryCredential::current();
+    }
+
+    /**
+     * ثبت‌نام این فروشگاه در مخزن و گرفتن لایسنس مقید به همین دامنه.
+     *
+     * توکن خام فقط در همین یک پاسخ برمی‌گردد، پس همان‌جا ذخیره می‌شود؛ اگر گم
+     * شود، ثبت‌نام دوباره جوابی نمی‌دهد و باید از مخزن توکن تازه صادر شود.
+     *
+     * @return array{ok: bool, message: string}
+     */
+    public function register(array $data): array
+    {
+        if (! $this->isConfigured()) {
+            return ['ok' => false, 'message' => 'آدرس مخزن تنظیم نشده است (MARKETPLACE_URL).'];
+        }
+
+        $domain = $this->domain();
+
+        if (blank($domain)) {
+            return ['ok' => false, 'message' => 'دامنهٔ فروشگاه از APP_URL خوانده نشد؛ اول آن را درست کنید.'];
+        }
+
+        try {
+            $response = Http::withHeaders(static::headers())
+                ->timeout(15)
+                ->post($this->url($this->prefix().'/register'), [
+                    'first_name' => $data['first_name'],
+                    'last_name'  => $data['last_name'] ?? '',
+                    'email'      => $data['email'],
+                    'domain'     => $domain,
+                ]);
+        } catch (Throwable $exception) {
+            return ['ok' => false, 'message' => 'ارتباط با مخزن برقرار نشد: '.$exception->getMessage()];
+        }
+
+        if (! $response->successful()) {
+            return [
+                'ok'      => false,
+                'message' => $response->json('message')
+                    ?: 'ثبت‌نام ناموفق بود؛ مخزن با کد '.$response->status().' پاسخ داد.',
+            ];
+        }
+
+        $body = (array) $response->json();
+
+        if (blank($body['token'] ?? null)) {
+            return ['ok' => false, 'message' => 'مخزن توکنی برنگرداند.'];
+        }
+
+        RepositoryCredential::create([
+            'token'         => $body['token'],
+            'domain'        => $body['domain'] ?? $domain,
+            'email'         => $body['email'] ?? $data['email'],
+            'customer_name' => $body['customer'] ?? trim($data['first_name'].' '.($data['last_name'] ?? '')),
+            'label'         => $body['label'] ?? null,
+            'expires_at'    => $body['expires_at'] ?? null,
+            'registered_at' => now(),
+        ]);
+
+        /** فهرست کش‌شده با توکن قبلی (یا بدون توکن) گرفته شده بود. */
+        $this->flush();
+
+        return ['ok' => true, 'message' => $body['message'] ?? 'فروشگاه در مخزن ثبت شد.'];
+    }
+
+    /**
+     * دور انداختن توکن ثبت‌نام — لایسنس در مخزن دست‌نخورده می‌ماند.
+     */
+    public function forgetCredential(): void
+    {
+        RepositoryCredential::query()->delete();
+
+        $this->flush();
     }
 
     /**
@@ -87,7 +185,7 @@ class RepositoryClient
     public function license(): array
     {
         if (! $this->hasToken()) {
-            return ['valid' => false, 'reason' => 'توکن لایسنس در .env تنظیم نشده است.'];
+            return ['valid' => false, 'reason' => 'این فروشگاه هنوز در مخزن ثبت نشده است.'];
         }
 
         $response = $this->request()->post($this->url($this->prefix().'/license/check'), [
@@ -214,7 +312,7 @@ class RepositoryClient
 
     protected function request(): PendingRequest
     {
-        return Http::withToken((string) config('marketplace.token'))
+        return Http::withToken((string) $this->token())
             ->withHeaders(static::headers())
             ->timeout(15);
     }

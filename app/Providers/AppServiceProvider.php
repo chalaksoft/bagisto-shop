@@ -111,6 +111,17 @@ class AppServiceProvider extends ServiceProvider
             Route::middleware(['web', 'shop', PreventRequestsDuringMaintenance::class])
                 ->get('/', [HomeController::class, 'index'])
                 ->name('shop.home.index');
+
+            /**
+             * صفحه‌های دیگری که با صفحه‌ساز چیده می‌شوند. سند با همین `slug`
+             * پیدا می‌شود، پس اضافه‌کردن صفحهٔ تازه یعنی یک سطر اینجا و یک سند
+             * در پنل — بدون کد.
+             */
+            foreach (['modules' => 'ماژول‌ها'] as $slug => $label) {
+                Route::middleware(['web', 'shop', PreventRequestsDuringMaintenance::class])
+                    ->get($slug, fn () => app(HomeController::class)->document($slug))
+                    ->name('shop.page.'.$slug);
+            }
         });
     }
 

@@ -49,6 +49,43 @@ class HomeController extends BagistoHomeController
      * هر دو کلاس با `class_exists` چک می‌شوند چون ماژول صفحه‌ساز از مخزن نصب
      * می‌شود و ممکن است روی این نصب اصلاً نباشد.
      */
+    /**
+     * هر صفحهٔ دیگری که با صفحه‌ساز چیده شده — مثل «/modules».
+     *
+     * برخلاف صفحهٔ اصلی که سندش از تنظیمات می‌آید، اینجا سند با `slug` پیدا
+     * می‌شود. اگر سند نبود ۴۰۴، نه صفحهٔ خالی.
+     */
+    public function document(string $slug)
+    {
+        $embed = $this->embedBySlug($slug);
+
+        abort_if(! $embed, 404);
+
+        return view('host::home.page-builder', [
+            'embed'        => $embed,
+            'channel'      => core()->getCurrentChannel(),
+            'showAdminBar' => View::exists('Elementor::parts.admin-bar'),
+        ]);
+    }
+
+    protected function embedBySlug(string $slug): ?array
+    {
+        $document = \Modules\Elementor\Model\ElementorDocument::class;
+        $embed    = \Modules\ElementorBagisto\Support\DocumentEmbed::class;
+
+        if (! class_exists($document) || ! class_exists($embed)) {
+            return null;
+        }
+
+        try {
+            $id = $document::query()->published()->where('slug', $slug)->value('id');
+
+            return $id ? $embed::resolve((int) $id) : null;
+        } catch (\Throwable) {
+            return null;
+        }
+    }
+
     protected function pageBuilderEmbed(): ?array
     {
         $setting = \Modules\Elementor\Model\Setting::class;

@@ -10,6 +10,10 @@ Route::group(['middleware' => ['admin'], 'prefix' => config('app.admin_url')], f
 
         Route::get('license', 'license')->name('admin.marketplace.license');
 
+        Route::post('register', 'register')->name('admin.marketplace.register');
+
+        Route::post('disconnect', 'disconnect')->name('admin.marketplace.disconnect');
+
         Route::post('install/{slug}', 'install')->name('admin.marketplace.repository.install');
     });
 

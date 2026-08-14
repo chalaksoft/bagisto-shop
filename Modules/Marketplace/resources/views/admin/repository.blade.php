@@ -26,8 +26,9 @@
 
     @if (! $configured)
         <div class="mb-3.5 rounded bg-amber-50 p-4 text-sm text-amber-800 dark:bg-amber-900/20">
-            آدرس مخزن تنظیم نشده است. در فایل <code>.env</code> این دو کلید را بگذارید:
-            <code>MARKETPLACE_URL</code> و <code>MARKETPLACE_TOKEN</code>.
+            آدرس مخزن تنظیم نشده است. در فایل <code>.env</code> کلید
+            <code>MARKETPLACE_URL</code> را بگذارید؛ توکن لایسنس را می‌توانید با
+            ثبت‌نام از همین صفحه بگیرید.
         </div>
     @elseif ($catalogue['error'])
         <div class="mb-3.5 rounded bg-red-50 p-4 text-sm text-red-700 dark:bg-red-900/20">
@@ -39,9 +40,23 @@
         $license = $catalogue['license'] ?? [];
     @endphp
 
-    @if ($license)
+    @if ($errors->any())
+        <div class="mb-3.5 rounded bg-red-50 p-4 text-sm text-red-700 dark:bg-red-900/20">
+            <ul class="list-inside list-disc">
+                @foreach ($errors->all() as $error)
+                    <li>{{ $error }}</li>
+                @endforeach
+            </ul>
+        </div>
+    @endif
+
+    @php
+        $licenseValid = (bool) ($license['valid'] ?? false);
+    @endphp
+
+    @if ($hasToken && $license)
         <div class="mb-3.5 rounded bg-white p-4 text-sm dark:bg-gray-900">
-            @if ($license['valid'] ?? false)
+            @if ($licenseValid)
                 <span class="label-active">لایسنس معتبر</span>
 
                 <span class="text-gray-600 dark:text-gray-300">
@@ -60,7 +75,90 @@
 
                 <span class="text-gray-600 dark:text-gray-300">{{ $license['reason'] ?? '' }}</span>
             @endif
+
+            <div class="mt-2 flex items-center justify-between gap-x-3 text-xs text-gray-500">
+                <span>
+                    @if ($tokenFromEnv)
+                        توکن از فایل <code>.env</code> خوانده می‌شود
+                        (<code>MARKETPLACE_TOKEN</code>). اگر با ثبت‌نام توکن تازه
+                        بگیرید، همان مقدم می‌شود.
+                    @else
+                        ثبت‌نام‌شده با {{ $credential?->email }}
+                        @if ($credential?->registered_at)
+                            — {{ $credential->registered_at->format('Y-m-d') }}
+                        @endif
+                        @if ($credential?->domain && $credential->domain !== $domain)
+                            — ⚠️ لایسنس روی <code>{{ $credential->domain }}</code> صادر شده، نه دامنهٔ فعلی.
+                        @endif
+                    @endif
+                </span>
+
+                @if (! $tokenFromEnv)
+                    <form method="POST"
+                          action="{{ route('admin.marketplace.disconnect') }}"
+                          onsubmit="return confirm('توکن ثبت‌نام پاک شود؟ برای همین دامنه دوباره ثبت‌نام ممکن نیست و باید از مخزن توکن تازه بگیرید.')">
+                        @csrf
+
+                        <button type="submit" class="text-red-600 hover:underline">پاک‌کردن توکن</button>
+                    </form>
+                @endif
+            </div>
         </div>
+    @endif
+
+    {{--
+        فرم ثبت‌نام تا وقتی لایسنس معتبر نشده سر جایش می‌ماند: «توکن دارم ولی
+        مخزن نمی‌شناسدش» (مثلاً .env کپی‌شده از نصب دیگر) همان‌قدر بن‌بست است که
+        «توکن ندارم»، و راه بیرون‌آمدن از هر دو یکی است.
+    --}}
+    @if ($configured && ! $licenseValid)
+        <form method="POST"
+              action="{{ route('admin.marketplace.register') }}"
+              class="mb-3.5 rounded bg-white p-5 dark:bg-gray-900">
+            @csrf
+
+            <p class="text-base font-semibold text-gray-800 dark:text-white">
+                ثبت‌نام فروشگاه در مخزن
+            </p>
+
+            <p class="mt-1 text-xs leading-6 text-gray-500">
+                این فروشگاه لایسنس معتبری ندارد. با ثبت‌نام، یک لایسنس مقید به دامنهٔ
+                <code>{{ $domain }}</code> صادر می‌شود و توکنش همین‌جا ذخیره می‌گردد —
+                نیازی به ویرایش <code>.env</code> نیست. برای هر دامنه فقط یک بار
+                ممکن است، پس اگر بعداً توکن را پاک کردید باید از پشتیبانی توکن تازه بگیرید.
+            </p>
+
+            <div class="mt-4 grid gap-4 lg:grid-cols-3">
+                <div>
+                    <label class="mb-1.5 block text-xs text-gray-600 dark:text-gray-300">نام</label>
+
+                    <input type="text" name="first_name" required value="{{ old('first_name') }}"
+                           class="w-full rounded border px-3 py-2 text-sm dark:border-gray-800 dark:bg-gray-950">
+                </div>
+
+                <div>
+                    <label class="mb-1.5 block text-xs text-gray-600 dark:text-gray-300">نام خانوادگی</label>
+
+                    <input type="text" name="last_name" value="{{ old('last_name') }}"
+                           class="w-full rounded border px-3 py-2 text-sm dark:border-gray-800 dark:bg-gray-950">
+                </div>
+
+                <div>
+                    <label class="mb-1.5 block text-xs text-gray-600 dark:text-gray-300">ایمیل</label>
+
+                    <input type="email" name="email" required dir="ltr" value="{{ old('email') }}"
+                           class="w-full rounded border px-3 py-2 text-sm dark:border-gray-800 dark:bg-gray-950">
+
+                    <p class="mt-1 text-xs text-gray-500">
+                        اگر با این ایمیل در مخزن حساب دارید، لایسنس به همان حساب وصل می‌شود.
+                    </p>
+                </div>
+            </div>
+
+            <div class="mt-4">
+                <button type="submit" class="primary-button">ثبت‌نام و دریافت لایسنس</button>
+            </div>
+        </form>
     @endif
 
     @if (empty($catalogue['modules']))

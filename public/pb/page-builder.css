@@ -39,21 +39,23 @@
 
 /* ── پالت ────────────────────────────────────────────────────────────── */
 :root {
-    --pb-ink: #0B1034;
-    --pb-primary: #2F5BEA;
-    --pb-primary-dark: #1E3FB8;
-    --pb-cream: #F7F4EE;
-    --pb-teal: #1F9D6B;
+    --pb-ink: #0A0E2E;
+    --pb-primary: #3D5AFE;
+    --pb-primary-dark: #2437D4;
+    --pb-violet: #7C4DFF;
+    --pb-cream: #F8F5EF;
+    --pb-teal: #00BFA5;
     --pb-coral: #FF6B57;
-    --pb-body: #4A5170;
-    --pb-muted: #767D99;
-    --pb-line: #E5E7F0;
-    --pb-line-soft: #EFF1F7;
+    --pb-body: #474E6B;
+    --pb-muted: #6F7793;
+    --pb-line: #E4E7F2;
+    --pb-line-soft: #EEF0F8;
     --pb-radius: 16px;
     --pb-radius-sm: 10px;
-    --pb-shadow-sm: 0 1px 2px rgba(11, 16, 52, .06), 0 2px 8px rgba(11, 16, 52, .04);
-    --pb-shadow: 0 4px 12px rgba(11, 16, 52, .07), 0 12px 32px rgba(11, 16, 52, .06);
-    --pb-shadow-lg: 0 18px 50px rgba(11, 16, 52, .14);
+    --pb-shadow-sm: 0 1px 2px rgba(10, 14, 46, .06), 0 2px 8px rgba(10, 14, 46, .04);
+    --pb-shadow: 0 4px 14px rgba(10, 14, 46, .08), 0 14px 36px rgba(10, 14, 46, .07);
+    --pb-shadow-lg: 0 20px 56px rgba(10, 14, 46, .16);
+    --pb-glow: 0 8px 24px rgba(61, 90, 254, .28);
     --pb-wrap: 1160px;
 }
 
@@ -115,7 +117,9 @@ li { margin: .4em 0; }
 
 /* ── بخش‌های صفحه ─────────────────────────────────────────────────────── */
 .bs-hero {
-    background: linear-gradient(180deg, var(--pb-cream) 0%, #fff 100%);
+    background:
+        radial-gradient(1100px 420px at 50% -140px, rgba(124, 77, 255, .13), transparent 65%),
+        linear-gradient(180deg, var(--pb-cream) 0%, #fff 100%);
     padding: 72px 0 44px;
     text-align: center;
 }
@@ -126,6 +130,8 @@ li { margin: .4em 0; }
 .bs-section--navy { background: var(--pb-ink); }
 .bs-section--navy h1, .bs-section--navy h2, .bs-section--navy h3 { color: #fff; }
 .bs-section--navy p { color: #C7CCE4; }
+
+.bs-scope h1, .bs-scope h2 { letter-spacing: -.02em; }
 
 .bs-eyebrow {
     color: var(--pb-primary);
@@ -288,15 +294,16 @@ li { margin: .4em 0; }
 /* ── دکمه‌ها ──────────────────────────────────────────────────────────── */
 .elementor-button {
     display: inline-block;
-    padding: 12px 26px;
+    padding: 13px 30px;
     border-radius: var(--pb-radius-sm);
-    background: var(--pb-primary);
+    background: linear-gradient(135deg, var(--pb-primary) 0%, var(--pb-violet) 100%);
+    box-shadow: var(--pb-glow);
     color: #fff;
     font-weight: 600;
     border: 1px solid transparent;
     transition: background .2s, transform .2s;
 }
-.elementor-button:hover { background: var(--pb-primary-dark); color: #fff; transform: translateY(-1px); }
+.elementor-button:hover { color: #fff; transform: translateY(-2px); box-shadow: 0 12px 30px rgba(61, 90, 254, .36); }
 
 .elementor-button--ghost {
     background: transparent;
@@ -381,3 +388,50 @@ li { margin: .4em 0; }
     color: var(--pb-primary);
     font-size: 15px;
 }
+
+
+/* ── لوگو ─────────────────────────────────────────────────────────────
+ * تم پیش‌فرض بجیستو لوگوی خودش را با ارتفاع ثابت می‌گذارد؛ لوگوی ما SVG
+ * پهن‌تری است و بدون این، له می‌شود.
+ */
+header img[alt], .logo img { max-height: 40px; width: auto; }
+
+/* ── کارت ماژول ──────────────────────────────────────────────────────── */
+.bs-module .elementor-icon-box-icon {
+    width: 44px; height: 44px;
+    display: inline-flex; align-items: center; justify-content: center;
+    border-radius: 12px;
+    background: linear-gradient(135deg, rgba(61, 90, 254, .12), rgba(124, 77, 255, .12));
+    color: var(--pb-primary);
+    font-size: 18px;
+}
+.bs-module { border-color: var(--pb-line-soft); }
+.bs-module:hover { border-color: rgba(61, 90, 254, .35); }
+
+/* ── هشدار/خطر (بخش ووکامرس) ─────────────────────────────────────────── */
+.bs-warn {
+    background: #FFF6F4;
+    border: 1px solid #FFD9D1;
+    border-radius: var(--pb-radius);
+    padding: 24px 22px;
+    height: 100%;
+}
+.bs-warn .elementor-icon-box-icon { color: var(--pb-coral); font-size: 24px; margin-bottom: 12px; }
+.bs-warn .elementor-icon-box-title { color: #8A2B1C; }
+
+/* ── نمونه‌کار ───────────────────────────────────────────────────────── */
+.bs-work {
+    border: 1px solid var(--pb-line);
+    border-radius: var(--pb-radius);
+    padding: 22px;
+    background: #fff;
+    height: 100%;
+    transition: box-shadow .25s, transform .25s;
+}
+.bs-work:hover { box-shadow: var(--pb-shadow); transform: translateY(-2px); }
+.bs-work .elementor-icon-box-title a { color: var(--pb-ink); }
+
+/* ── اسلایدر بالای صفحه ──────────────────────────────────────────────── */
+.bs-slider { background: var(--pb-ink); padding: 0; }
+.bs-slider .swiper-slide, .bs-slider .elementor-image-carousel-wrapper { border-radius: 0; }
+.bs-slider img { width: 100%; object-fit: cover; }

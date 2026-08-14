@@ -33,11 +33,56 @@ class RepositoryController extends Controller
         $installed = InstalledModule::query()->pluck('version', 'name');
 
         return view('Marketplace::admin.repository', [
-            'catalogue' => $catalogue,
-            'installed' => $installed,
-            'domain'    => $this->repository->domain(),
-            'configured' => $this->repository->isConfigured(),
+            'catalogue'    => $catalogue,
+            'installed'    => $installed,
+            'domain'       => $this->repository->domain(),
+            'configured'   => $this->repository->isConfigured(),
+            'hasToken'     => $this->repository->hasToken(),
+            'tokenFromEnv' => $this->repository->tokenFromEnv(),
+            'credential'   => $this->repository->credential(),
         ]);
+    }
+
+    /**
+     * ثبت‌نام این فروشگاه در مخزن.
+     *
+     * جایگزین «توکن را دستی در .env بگذار» — روی هاست اشتراکی و برای ادمینی که
+     * SSH ندارد، تنها راه عملی. لایسنس مقید به همین دامنه صادر می‌شود.
+     */
+    public function register(Request $request)
+    {
+        $this->assertSuperAdmin();
+
+        $data = $request->validate([
+            'first_name' => 'required|string|max:100',
+            'last_name'  => 'nullable|string|max:100',
+            'email'      => 'required|email|max:190',
+        ], [], [
+            'first_name' => 'نام',
+            'email'      => 'ایمیل',
+        ]);
+
+        $result = $this->repository->register($data);
+
+        session()->flash($result['ok'] ? 'success' : 'error', $result['message']);
+
+        return redirect()->route('admin.marketplace.repository');
+    }
+
+    /**
+     * دور انداختن توکن ثبت‌نام روی همین فروشگاه. لایسنس در مخزن پاک نمی‌شود،
+     * پس ثبت‌نام دوباره با همین دامنه جواب نمی‌دهد و باید از مخزن توکن تازه
+     * گرفت — همان‌طور که برای هر توکن گم‌شده‌ای.
+     */
+    public function disconnect()
+    {
+        $this->assertSuperAdmin();
+
+        $this->repository->forgetCredential();
+
+        session()->flash('success', 'توکن ثبت‌نام از این فروشگاه پاک شد.');
+
+        return redirect()->route('admin.marketplace.repository');
     }
 
     /**

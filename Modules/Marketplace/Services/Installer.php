@@ -173,7 +173,7 @@ class Installer
 
         File::ensureDirectoryExists(dirname($target));
 
-        $response = Http::withToken((string) config('marketplace.token'))
+        $response = Http::withToken((string) app(RepositoryClient::class)->token())
             ->withHeaders(RepositoryClient::headers())
             ->timeout(120)
             ->sink($target)

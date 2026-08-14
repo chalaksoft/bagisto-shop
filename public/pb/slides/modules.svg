@@ -1,0 +1,14 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 380" width="1200" height="380" role="img" aria-label="۱۷ ماژول آماده برای فروشگاه شما">
+    <defs>
+        <linearGradient id="g" x1="0" y1="0" x2="1" y2="1">
+            <stop offset="0" stop-color="#3D5AFE"/><stop offset="1" stop-color="#7C4DFF"/>
+        </linearGradient>
+    </defs>
+    <rect width="1200" height="380" fill="url(#g)"/>
+    <circle cx="1040" cy="70" r="150" fill="#fff" opacity=".07"/>
+    <circle cx="170" cy="330" r="110" fill="#fff" opacity=".06"/>
+    <text x="600" y="180" text-anchor="middle" font-family="Vazirmatn, Tahoma, sans-serif"
+          font-size="42" font-weight="700" fill="#fff">۱۷ ماژول آماده برای فروشگاه شما</text>
+    <text x="600" y="232" text-anchor="middle" font-family="Vazirmatn, Tahoma, sans-serif"
+          font-size="19" fill="#fff" opacity=".85">درگاه‌های ایرانی، پیامک، ورود با موبایل، صفحه‌ساز، بلاگ و بیشتر</text>
+</svg>
