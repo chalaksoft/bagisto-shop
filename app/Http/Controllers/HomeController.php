@@ -59,22 +59,32 @@ class HomeController extends BagistoHomeController
     /**
      * رندر سند همراه هدر و فوترِ صفحه‌ساز.
      *
-     * `renderDocumentParts` هدر و فوتر انتخاب‌شده در تنظیمات صفحه‌ساز را
-     * می‌سازد و آدرس CSS تولیدی‌شان را هم برمی‌گرداند؛ همان چیزی که بلاگ هم
-     * استفاده می‌کند.
+     * `SiteParts::header()`/`footer()` سند انتخاب‌شده در تنظیمات صفحه‌ساز را
+     * می‌دهند و `renderPart()` آن را به HTML و آدرس CSS تولیدی تبدیل می‌کند —
+     * همان مسیری که بلاگ هم می‌رود.
+     *
+     * ⚠️ `Renderer::renderDocumentParts()` این کار را نمی‌کند؛ آن فقط بدنهٔ
+     * خود سند را می‌سازد و کلیدهایش `html` و `css` است.
      */
     protected function renderDocument(array $embed)
     {
         $document = $embed['document'];
 
-        $parts = (new \Modules\Elementor\Support\Renderer())->renderDocumentParts($document);
+        $parts = \Modules\Elementor\Support\SiteParts::class;
+
+        $header = $parts::renderPart($parts::header());
+        $footer = $parts::renderPart($parts::footer());
 
         return view('host::home.page-builder', [
             'document'     => $document,
             'html'         => $embed['html'],
-            'header_html'  => $parts['header_html'] ?? '',
-            'footer_html'  => $parts['footer_html'] ?? '',
-            'css_links'    => array_merge((array) ($embed['css'] ?? []), (array) ($parts['css_links'] ?? [])),
+            'header_html'  => $header['html'] ?? '',
+            'footer_html'  => $footer['html'] ?? '',
+            'css_links'    => array_merge(
+                (array) ($embed['css'] ?? []),
+                (array) ($header['css'] ?? []),
+                (array) ($footer['css'] ?? []),
+            ),
             'channel'      => core()->getCurrentChannel(),
             'showAdminBar' => View::exists('Elementor::parts.admin-bar'),
         ]);
