@@ -42,13 +42,6 @@ yarn-error.log
 /storage/keys
 /storage/app/marketplace
 
-# کلید عمومی مخزن مخصوص هر نصب است.
-#
-# خودش راز نیست، ولی اگر یکی در ریپو باشد هر نصبی بی‌سروصدا به کلید کس دیگری
-# اعتماد می‌کند. هر نصب باید کلید عمومی مخزنِ خودش را اینجا بگذارد —
-# روشش در Modules/Marketplace/resources/keys/README.md.
-/Modules/Marketplace/resources/keys/repository.pub
-
 # ماژول‌های نصب‌شده از پنل.
 #
 # این‌ها مال گیت نیستند: هر فروشگاه ماژول‌های خودش را نصب می‌کند و نسخه‌شان از
