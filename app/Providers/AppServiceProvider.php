@@ -2,12 +2,14 @@
 
 namespace App\Providers;
 
+use App\Http\Controllers\HomeController;
 use Barryvdh\Debugbar\Facades\Debugbar;
+use Illuminate\Foundation\Http\Middleware\PreventRequestsDuringMaintenance;
 use Illuminate\Support\Facades\Artisan;
 use Illuminate\Support\Facades\ParallelTesting;
 use Illuminate\Support\Facades\Request;
+use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Facades\URL;
-use Illuminate\Support\Facades\View;
 use Illuminate\Support\ServiceProvider;
 
 class AppServiceProvider extends ServiceProvider
@@ -41,12 +43,7 @@ class AppServiceProvider extends ServiceProvider
 
         $this->registerPageBuilderStyles();
 
-        /**
-         * بعد از بوت شدن **همهٔ** پرووایدرها: `ThemeServiceProvider` بجیستو
-         * فضای‌نام `shop` را در boot خودش می‌سازد و چون بعد از این پرووایدر
-         * بوت می‌شود، هر چه اینجا اضافه کنیم را بازنویسی می‌کند.
-         */
-        $this->app->booted(fn () => $this->registerThemeViewOverrides());
+        $this->overrideHomeRoute();
 
         ParallelTesting::setUpTestDatabase(function (string $database, int $token) {
             Artisan::call('db:seed');
@@ -73,25 +70,26 @@ class AppServiceProvider extends ServiceProvider
     }
 
     /**
-     * بازنویسی ویوهای تم فروشگاه از `resources/themes/{theme}/views`.
+     * روت `/` را به کنترلر خودمان بسپار تا صفحهٔ اصلیِ صفحه‌ساز رندر شود.
      *
-     * `config/themes.php` این مسیر را به‌عنوان `views_path` تم اعلام می‌کند،
-     * ولی بجیستو فقط وقتی به فضای‌نام `shop` اضافه‌اش می‌کند که تم در دیتابیس
-     * ثبت و فعال شده باشد. روی نصب تازه این اتفاق نمی‌افتد و `shop::home.index`
-     * مستقیم به ویوی پکیج می‌رسد — نتیجه‌اش این بود که صفحهٔ اصلیِ ساخته‌شده با
-     * صفحه‌ساز نادیده گرفته می‌شد و صفحهٔ پیش‌فرض بجیستو رندر می‌شد.
+     * بجیستو `GET /` را در `ShopServiceProvider` ثبت می‌کند. کلید جست‌وجوی
+     * روت‌ها در لاراول «متد + آدرس» است و ثبت دوم روی اولی می‌نشیند، پس این
+     * کار باید **بعد از** بوت شدن همهٔ پرووایدرها انجام شود.
      *
-     * `prependNamespace` مسیر تم را جلوتر از پکیج می‌گذارد، پس هر ویوی موجود
-     * در تم اولویت دارد و بقیه مثل قبل از پکیج می‌آیند. `packages/Webkul` هم
-     * دست‌نخورده می‌ماند.
+     * میان‌افزارها عیناً همان‌هایی هستند که بجیستو استفاده می‌کند (`web`،
+     * `shop` و maintenance)، وگرنه کانال، زبان، ارز و قالب فعال ست نمی‌شوند و
+     * `<x-shop::layouts>` رندر نمی‌شود. `cache.response` عمداً نیست: صفحهٔ
+     * اصلی از صفحه‌ساز می‌آید و باید بعد از هر ویرایش تازه باشد.
+     *
+     * نامی هم نمی‌گذاریم؛ `route('shop.home.index')` همچنان به همان `/` اشاره
+     * می‌کند و نام تکراری لازم نیست.
      */
-    protected function registerThemeViewOverrides(): void
+    protected function overrideHomeRoute(): void
     {
-        $path = base_path(config('themes.shop.default.views_path', 'resources/themes/default/views'));
-
-        if (is_dir($path)) {
-            View::prependNamespace('shop', $path);
-        }
+        $this->app->booted(function () {
+            Route::middleware(['web', 'shop', PreventRequestsDuringMaintenance::class])
+                ->get('/', [HomeController::class, 'index']);
+        });
     }
 
     /**
