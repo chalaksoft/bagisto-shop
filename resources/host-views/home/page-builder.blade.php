@@ -20,12 +20,9 @@
     @endif
 
     {{--
-        پایهٔ ظاهری صفحه‌ساز. صفحهٔ اصلی داخل قالب فروشگاه رندر می‌شود و برخلاف
-        صفحه‌های مستقل صفحه‌ساز، `elementor.extra_styles` اینجا بار نمی‌شود.
+        پایهٔ ظاهری صفحه‌ساز (`elementor.extra_styles`) را همان پارشال بالا
+        بار می‌کند؛ تکرارش اینجا فقط یک لینک اضافه در head می‌ساخت.
     --}}
-    @foreach ((array) config('elementor.extra_styles', []) as $href)
-        <link rel="stylesheet" href="{{ $href }}">
-    @endforeach
 @endpush
 
 <x-shop::layouts>
