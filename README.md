@@ -22,6 +22,7 @@ cp .env.example .env
 php artisan key:generate
 # .env را ویرایش کنید، بعد:
 php artisan bagisto:install
+php artisan shop:defaults
 ```
 
 روی هاست اشتراکی composer لازم نیست؛ فایل آمادهٔ
