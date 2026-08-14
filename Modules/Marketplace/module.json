@@ -1,0 +1,17 @@
+{
+    "name": "Marketplace",
+    "alias": "marketplace",
+    "description": "نصب، به‌روزرسانی، فعال/غیرفعال‌سازی و حذف ماژول‌ها از داخل پنل مدیریت — بدون SSH و بدون composer.",
+    "keywords": ["modules", "installer", "admin", "marketplace"],
+    "version": "1.0.0",
+    "priority": 60,
+    "providers": [
+        "Modules\\Marketplace\\ModuleServiceProvider"
+    ],
+    "aliases": {},
+    "files": [],
+    "requires": [],
+    "requires_bagisto": ">=2.0.0",
+    "requires_php": ">=8.2",
+    "assets_tag": null
+}
