@@ -80,7 +80,7 @@ class AppServiceProvider extends ServiceProvider
         config([
             'elementor.extra_styles' => array_values(array_unique(array_merge(
                 (array) config('elementor.extra_styles', []),
-                ['/css/page-builder.css'],
+                ['/pb/page-builder.css'],
             ))),
         ]);
     }

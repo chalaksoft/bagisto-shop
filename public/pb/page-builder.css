@@ -1,0 +1,325 @@
+/*
+ * پایهٔ ظاهری صفحه‌های ساخته‌شده با صفحه‌ساز.
+ *
+ * ┄┄ چرا این فایل لازم است ┄┄
+ *
+ * قالب رندر صفحه‌ساز یک لایهٔ مستقل است و فقط CSS خود Elementor را بار می‌کند —
+ * نه فونت تم را، نه ریست را، نه تایپوگرافی را. بدون این فایل صفحه با فونت
+ * پیش‌فرض مرورگر و اندازه‌های خام بالا می‌آید که شبیه خرابی است.
+ *
+ * از راه رسمی خودِ هسته بار می‌شود: `config('elementor.extra_styles')` در
+ * `AppServiceProvider`. هیچ فایلی از `Modules/Elementor` دست نمی‌خورد.
+ *
+ * فایل عمداً CSS خام است و از vite رد نمی‌شود: صفحه‌ساز ممکن است روی نصبی
+ * اجرا شود که هرگز بیلد نشده، و این پایه نباید به بیلد گره بخورد.
+ */
+
+/* ── فونت ──────────────────────────────────────────────────────────────
+ * وزیرمتن محلی سرو می‌شود نه از CDN: روی اینترنت ایران، jsdelivr و
+ * fonts.googleapis اغلب کند یا مسدودند و صفحه با فونت پیش‌فرض می‌پرد.
+ */
+@font-face {
+    font-family: 'Vazirmatn';
+    src: url('/pb/fonts/Vazirmatn-Regular.woff2') format('woff2');
+    font-weight: 400;
+    font-display: swap;
+}
+@font-face {
+    font-family: 'Vazirmatn';
+    src: url('/pb/fonts/Vazirmatn-Medium.woff2') format('woff2');
+    font-weight: 500 600;
+    font-display: swap;
+}
+@font-face {
+    font-family: 'Vazirmatn';
+    src: url('/pb/fonts/Vazirmatn-Bold.woff2') format('woff2');
+    font-weight: 700 800;
+    font-display: swap;
+}
+
+/* ── پالت ────────────────────────────────────────────────────────────── */
+:root {
+    --pb-ink: #0B1034;
+    --pb-primary: #2F5BEA;
+    --pb-primary-dark: #1E3FB8;
+    --pb-cream: #F7F4EE;
+    --pb-teal: #1F9D6B;
+    --pb-coral: #FF6B57;
+    --pb-body: #4A5170;
+    --pb-muted: #767D99;
+    --pb-line: #E5E7F0;
+    --pb-line-soft: #EFF1F7;
+    --pb-radius: 16px;
+    --pb-radius-sm: 10px;
+    --pb-shadow-sm: 0 1px 2px rgba(11, 16, 52, .06), 0 2px 8px rgba(11, 16, 52, .04);
+    --pb-shadow: 0 4px 12px rgba(11, 16, 52, .07), 0 12px 32px rgba(11, 16, 52, .06);
+    --pb-shadow-lg: 0 18px 50px rgba(11, 16, 52, .14);
+    --pb-wrap: 1160px;
+}
+
+/* ── ریست و پایه ─────────────────────────────────────────────────────── */
+*, *::before, *::after { box-sizing: border-box; }
+
+html { -webkit-text-size-adjust: 100%; }
+
+body {
+    margin: 0;
+    background: #fff;
+    color: var(--pb-body);
+    font-family: 'Vazirmatn', -apple-system, 'Segoe UI', Tahoma, sans-serif;
+    font-size: 17px;
+    line-height: 1.9;
+    -webkit-font-smoothing: antialiased;
+}
+
+img, svg, video { max-width: 100%; height: auto; }
+
+a { color: var(--pb-primary); text-decoration: none; }
+a:hover { color: var(--pb-primary-dark); }
+
+h1, h2, h3, h4, h5, h6 {
+    color: var(--pb-ink);
+    font-weight: 700;
+    line-height: 1.35;
+    letter-spacing: -.015em;
+    margin: 0 0 .6em;
+}
+h1 { font-size: clamp(1.9rem, 4vw, 2.9rem); }
+h2 { font-size: clamp(1.5rem, 3vw, 2.1rem); }
+h3 { font-size: 1.25rem; }
+
+p { margin: 0 0 1.1em; }
+ul, ol { margin: 0 0 1.1em; padding-inline-start: 1.4em; }
+li { margin: .4em 0; }
+
+/* ── ظرف صفحه ─────────────────────────────────────────────────────────
+ * Elementor عرض ظرف را با کلاس خودش می‌دهد ولی مقدار پیش‌فرضش برای این
+ * طرح پهن است؛ اینجا به همان ۱۱۶۰ پیکسل سایت می‌رسانیمش.
+ */
+.elementor-section.elementor-section-boxed > .elementor-container {
+    max-width: var(--pb-wrap);
+    margin-inline: auto;
+    padding-inline: 20px;
+}
+
+.elementor-section { padding: 0; }
+
+/* ستون‌ها: فاصلهٔ پیش‌فرض معقول و چیدمان موبایل */
+.elementor-container { display: flex; flex-wrap: wrap; gap: 24px; }
+.elementor-column { flex: 1 1 0; min-width: 0; }
+
+@media (max-width: 880px) {
+    .elementor-container { flex-direction: column; }
+    .elementor-column { width: 100% !important; flex: 1 1 100%; }
+}
+
+/* ── بخش‌های صفحه ─────────────────────────────────────────────────────── */
+.bs-hero {
+    background: linear-gradient(180deg, var(--pb-cream) 0%, #fff 100%);
+    padding: 72px 0 44px;
+    text-align: center;
+}
+.bs-hero p { color: var(--pb-body); font-size: 1.0625rem; max-width: 720px; margin-inline: auto; }
+
+.bs-section { padding: 52px 0; }
+.bs-section--cream { background: var(--pb-cream); }
+.bs-section--navy { background: var(--pb-ink); }
+.bs-section--navy h1, .bs-section--navy h2, .bs-section--navy h3 { color: #fff; }
+.bs-section--navy p { color: #C7CCE4; }
+
+.bs-eyebrow {
+    color: var(--pb-primary);
+    font-weight: 600;
+    font-size: .875rem;
+    letter-spacing: .04em;
+    margin-bottom: .4em;
+}
+
+/* ── کارت‌های بلاگ ────────────────────────────────────────────────────── */
+.elementor-widget-blog-grid .blog-grid,
+.elementor-widget-related-posts .blog-grid {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 24px;
+}
+@media (max-width: 980px) {
+    .elementor-widget-blog-grid .blog-grid,
+    .elementor-widget-related-posts .blog-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+}
+@media (max-width: 620px) {
+    .elementor-widget-blog-grid .blog-grid,
+    .elementor-widget-related-posts .blog-grid { grid-template-columns: 1fr; }
+}
+
+.blog-card, article.blog-card, .blog-grid > article, .blog-grid > div {
+    background: #fff;
+    border: 1px solid var(--pb-line);
+    border-radius: var(--pb-radius);
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+    transition: box-shadow .25s ease, transform .25s ease, border-color .25s ease;
+}
+.blog-card:hover, .blog-grid > article:hover, .blog-grid > div:hover {
+    box-shadow: var(--pb-shadow);
+    transform: translateY(-2px);
+    border-color: var(--pb-line-soft);
+}
+
+.blog-grid img { width: 100%; aspect-ratio: 16 / 9; object-fit: cover; display: block; }
+
+.blog-grid h2, .blog-grid h3, .blog-grid h4 {
+    font-size: 1.0625rem;
+    line-height: 1.7;
+    margin: 0 0 .5em;
+    padding: 0 18px;
+}
+.blog-grid h2:first-child, .blog-grid h3:first-child { padding-top: 18px; }
+.blog-grid h2 a, .blog-grid h3 a, .blog-grid h4 a { color: var(--pb-ink); }
+.blog-grid h2 a:hover, .blog-grid h3 a:hover, .blog-grid h4 a:hover { color: var(--pb-primary); }
+
+.blog-grid p { padding: 0 18px; font-size: .9375rem; color: var(--pb-body); line-height: 1.9; }
+
+.blog-grid .post-meta, .blog-grid time, .blog-grid .meta {
+    padding: 0 18px;
+    font-size: .8125rem;
+    color: var(--pb-muted);
+}
+
+.blog-grid .read-more, .blog-grid a.more {
+    margin: auto 18px 18px;
+    align-self: flex-start;
+    color: var(--pb-primary);
+    font-weight: 600;
+    font-size: .9375rem;
+}
+
+/* ── دسته‌بندی‌ها و جست‌وجو ────────────────────────────────────────────── */
+.elementor-widget-blog-categories ul {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+}
+.elementor-widget-blog-categories li { margin: 0; }
+.elementor-widget-blog-categories a {
+    display: inline-block;
+    padding: 7px 16px;
+    border: 1px solid var(--pb-line);
+    border-radius: 999px;
+    background: #fff;
+    color: var(--pb-ink);
+    font-size: .9375rem;
+    transition: background .2s, color .2s, border-color .2s;
+}
+.elementor-widget-blog-categories a:hover {
+    background: var(--pb-primary);
+    border-color: var(--pb-primary);
+    color: #fff;
+}
+
+.elementor-widget-blog-search input[type="search"],
+.elementor-widget-blog-search input[type="text"] {
+    width: 100%;
+    padding: 11px 14px;
+    border: 1px solid var(--pb-line);
+    border-radius: var(--pb-radius-sm);
+    font: inherit;
+    background: #fff;
+}
+
+/* ── متن مقاله ────────────────────────────────────────────────────────── */
+.bs-prose, .elementor-widget-post-content { font-size: 1.0625rem; line-height: 2.1; color: var(--pb-body); }
+.bs-prose h2, .elementor-widget-post-content h2 { margin: 2.2em 0 .7em; font-size: 1.5rem; }
+.bs-prose h3, .elementor-widget-post-content h3 { margin: 1.8em 0 .6em; font-size: 1.2rem; }
+
+.bs-prose table, .elementor-widget-post-content table {
+    width: 100%;
+    border-collapse: collapse;
+    margin: 1.6em 0;
+    font-size: .95rem;
+}
+.bs-prose th, .bs-prose td,
+.elementor-widget-post-content th, .elementor-widget-post-content td {
+    border: 1px solid var(--pb-line);
+    padding: 10px 12px;
+    text-align: start;
+}
+.bs-prose th, .elementor-widget-post-content th { background: var(--pb-cream); color: var(--pb-ink); font-weight: 600; }
+
+.bs-prose blockquote, .elementor-widget-post-content blockquote {
+    border-inline-start: 3px solid var(--pb-primary);
+    background: var(--pb-cream);
+    margin: 1.6em 0;
+    padding: 14px 18px;
+    border-radius: 0 var(--pb-radius) var(--pb-radius) 0;
+    color: var(--pb-ink);
+}
+.bs-prose img, .elementor-widget-post-content img { border-radius: var(--pb-radius); }
+
+/* ── ستون کناری ──────────────────────────────────────────────────────── */
+.bs-sidebar > .elementor-widget-wrap > .elementor-widget,
+.bs-sidebar .elementor-widget {
+    background: #fff;
+    border: 1px solid var(--pb-line);
+    border-radius: var(--pb-radius);
+    padding: 18px;
+    margin-bottom: 18px;
+}
+@media (min-width: 981px) {
+    .bs-sidebar { position: sticky; top: 24px; align-self: start; }
+}
+
+/* ── فهرست مطالب ─────────────────────────────────────────────────────── */
+.elementor-widget-table-of-contents ul { list-style: none; padding: 0; margin: 0; }
+.elementor-widget-table-of-contents li { margin: .35em 0; }
+.elementor-widget-table-of-contents a { color: var(--pb-body); font-size: .9375rem; }
+.elementor-widget-table-of-contents a:hover { color: var(--pb-primary); }
+
+/* ── مسیر راهنما و متای نوشته ─────────────────────────────────────────── */
+.elementor-widget-breadcrumb { font-size: .875rem; color: var(--pb-muted); margin-bottom: .8em; }
+.elementor-widget-breadcrumb a { color: var(--pb-muted); }
+.elementor-widget-breadcrumb a:hover { color: var(--pb-primary); }
+
+.elementor-widget-post-meta { color: var(--pb-muted); font-size: .9375rem; }
+
+/* ── دکمه‌ها ──────────────────────────────────────────────────────────── */
+.elementor-button {
+    display: inline-block;
+    padding: 12px 26px;
+    border-radius: var(--pb-radius-sm);
+    background: var(--pb-primary);
+    color: #fff;
+    font-weight: 600;
+    border: 1px solid transparent;
+    transition: background .2s, transform .2s;
+}
+.elementor-button:hover { background: var(--pb-primary-dark); color: #fff; transform: translateY(-1px); }
+
+.elementor-button--ghost {
+    background: transparent;
+    color: var(--pb-primary);
+    border-color: var(--pb-line);
+}
+.elementor-button--ghost:hover { background: var(--pb-cream); color: var(--pb-primary-dark); }
+
+/* ── صفحه‌بندی ───────────────────────────────────────────────────────── */
+.pagination, nav[role="navigation"] ul { display: flex; gap: 6px; list-style: none; padding: 0; justify-content: center; }
+.pagination a, .pagination span, nav[role="navigation"] a, nav[role="navigation"] span {
+    display: inline-flex;
+    min-width: 38px;
+    height: 38px;
+    align-items: center;
+    justify-content: center;
+    border: 1px solid var(--pb-line);
+    border-radius: var(--pb-radius-sm);
+    color: var(--pb-ink);
+    font-size: .9375rem;
+}
+.pagination .active span, nav[role="navigation"] [aria-current="page"] {
+    background: var(--pb-primary);
+    border-color: var(--pb-primary);
+    color: #fff;
+}
