@@ -41,7 +41,12 @@ class AppServiceProvider extends ServiceProvider
 
         $this->registerPageBuilderStyles();
 
-        $this->registerThemeViewOverrides();
+        /**
+         * بعد از بوت شدن **همهٔ** پرووایدرها: `ThemeServiceProvider` بجیستو
+         * فضای‌نام `shop` را در boot خودش می‌سازد و چون بعد از این پرووایدر
+         * بوت می‌شود، هر چه اینجا اضافه کنیم را بازنویسی می‌کند.
+         */
+        $this->app->booted(fn () => $this->registerThemeViewOverrides());
 
         ParallelTesting::setUpTestDatabase(function (string $database, int $token) {
             Artisan::call('db:seed');
