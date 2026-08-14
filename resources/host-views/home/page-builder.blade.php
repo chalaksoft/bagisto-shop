@@ -11,9 +11,12 @@
 
     <meta name="keywords" content="{{ $channel->home_seo['meta_keywords'] ?? '' }}" />
 
-    {{-- CSS اختصاصی سند: رنگ‌ها و چیدمانی که در ویرایشگر تنظیم شده. --}}
-    @if (! empty($embed['css']))
-        <style>{!! $embed['css'] !!}</style>
+    {{--
+        CSS اختصاصی سند. ساختارش آرایه است نه رشته، پس با پارشال خود ماژول
+        رندر می‌شود — همان چیزی که قالب‌های صفحه‌ساز هم استفاده می‌کنند.
+    --}}
+    @if (! empty($embed['css']) && view()->exists('ElementorBagisto::parts.embed-head'))
+        @include('ElementorBagisto::parts.embed-head', ['eeCss' => $embed['css']])
     @endif
 
     {{--
