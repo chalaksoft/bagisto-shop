@@ -1,4 +1,41 @@
 {
+  "Modules/Elementor/resources/js/editor/main.jsx": {
+    "file": "assets/main-qMoUlb9H.js",
+    "name": "main",
+    "src": "Modules/Elementor/resources/js/editor/main.jsx",
+    "isEntry": true,
+    "imports": [
+      "_dom-Dz-Ijzw_.js"
+    ],
+    "dynamicImports": [
+      "Modules/Elementor/resources/js/elementor/vendor/web-cli.js"
+    ],
+    "css": [
+      "assets/main-Dw6xXq85.css"
+    ]
+  },
+  "Modules/Elementor/resources/js/elementor/vendor/web-cli.js": {
+    "file": "assets/web-cli-Cbe73c15.js",
+    "name": "web-cli",
+    "src": "Modules/Elementor/resources/js/elementor/vendor/web-cli.js",
+    "isDynamicEntry": true
+  },
+  "Modules/Elementor/resources/js/front.js": {
+    "file": "assets/front-rRP-6gB5.js",
+    "name": "front",
+    "src": "Modules/Elementor/resources/js/front.js",
+    "isEntry": true,
+    "imports": [
+      "_dom-Dz-Ijzw_.js"
+    ],
+    "css": [
+      "assets/front-BxXvJjvi.css"
+    ]
+  },
+  "_dom-Dz-Ijzw_.js": {
+    "file": "assets/dom-Dz-Ijzw_.js",
+    "name": "dom"
+  },
   "resources/css/app.css": {
     "file": "assets/app-l0sNRNKZ.js",
     "name": "app",
@@ -6,7 +43,7 @@
     "isEntry": true
   },
   "resources/js/app.js": {
-    "file": "assets/app-C0G0cght.js",
+    "file": "assets/app-DUr89oQr.js",
     "name": "app",
     "src": "resources/js/app.js",
     "isEntry": true
