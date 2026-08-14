@@ -81,14 +81,17 @@ class AppServiceProvider extends ServiceProvider
      * `<x-shop::layouts>` رندر نمی‌شود. `cache.response` عمداً نیست: صفحهٔ
      * اصلی از صفحه‌ساز می‌آید و باید بعد از هر ویرایش تازه باشد.
      *
-     * نامی هم نمی‌گذاریم؛ `route('shop.home.index')` همچنان به همان `/` اشاره
-     * می‌کند و نام تکراری لازم نیست.
+     * نام `shop.home.index` **باید** تکرار شود: ثبت دوم، ثبت اول را از جدول
+     * روت‌ها بیرون می‌کند و اگر نام را نگذاریم آن نام دیگر وجود ندارد —
+     * هر `route('shop.home.index')` در قالب‌ها و ریدایرکت‌ها با
+     * «Route [shop.home.index] not defined» می‌شکند. (دقیقاً همین اتفاق افتاد.)
      */
     protected function overrideHomeRoute(): void
     {
         $this->app->booted(function () {
             Route::middleware(['web', 'shop', PreventRequestsDuringMaintenance::class])
-                ->get('/', [HomeController::class, 'index']);
+                ->get('/', [HomeController::class, 'index'])
+                ->name('shop.home.index');
         });
     }
 
