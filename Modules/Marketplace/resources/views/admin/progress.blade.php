@@ -33,11 +33,22 @@
             @endforeach
         </ol>
 
-        <p class="mt-5 text-sm text-gray-500" data-message>در حال شروع…</p>
+        <p class="mt-5 flex items-center gap-x-2 text-sm text-gray-500" data-message>
+            <span class="inline-block h-3 w-3 animate-spin rounded-full border-2 border-gray-300 border-t-blue-600" data-spinner></span>
+            <span data-message-text>در حال شروع…</span>
+        </p>
 
-        <p class="mt-2 hidden text-sm text-red-600" data-error></p>
+        {{--
+            نتیجه باید در نگاه اول دیده شود. قبلاً فقط یک خط خاکستری کم‌رنگ
+            عوض می‌شد و کاربر نمی‌فهمید نصب تمام شده یا نه.
+        --}}
+        <div class="mt-5 hidden rounded border p-4" data-result>
+            <p class="text-sm font-semibold" data-result-title></p>
 
-        <a href="{{ route('admin.marketplace.index') }}" class="secondary-button mt-5 hidden" data-back>
+            <p class="mt-1 text-xs leading-6" data-result-body></p>
+        </div>
+
+        <a href="{{ route('admin.marketplace.index') }}" class="primary-button mt-5 hidden" data-back>
             بازگشت به فهرست ماژول‌ها
         </a>
     </div>
@@ -50,11 +61,14 @@
              * همان‌جا ادامه پیدا می‌کند و مرحله‌ای دوباره اجرا نمی‌شود.
              */
             (function () {
-                const root    = document.getElementById('marketplace-progress');
-                const message = root.querySelector('[data-message]');
-                const error   = root.querySelector('[data-error]');
-                const back    = root.querySelector('[data-back]');
-                const token   = root.dataset.token;
+                const root        = document.getElementById('marketplace-progress');
+                const message     = root.querySelector('[data-message-text]');
+                const spinner     = root.querySelector('[data-spinner]');
+                const result      = root.querySelector('[data-result]');
+                const resultTitle = root.querySelector('[data-result-title]');
+                const resultBody  = root.querySelector('[data-result-body]');
+                const back        = root.querySelector('[data-back]');
+                const token       = root.dataset.token;
 
                 const items = Array.from(root.querySelectorAll('[data-step]'));
 
@@ -80,23 +94,45 @@
                     });
                 }
 
-                function finish(payload) {
-                    if (payload.status === 'failed') {
-                        error.textContent = payload.error || 'نصب ناموفق بود.';
-                        error.classList.remove('hidden');
-                        message.textContent = 'نصب متوقف شد؛ فایل‌های قبلی دست‌نخورده برگردانده شدند.';
-                    } else {
-                        message.textContent = 'ماژول ' + payload.module + ' نسخهٔ ' + payload.version
-                            + ' نصب شد. از ریکوئست بعدی بوت می‌شود.';
-                    }
+                function show(kind, title, body) {
+                    spinner.classList.add('hidden');
+
+                    result.className = 'mt-5 rounded border p-4 ' + (kind === 'success'
+                        ? 'border-green-200 bg-green-50 text-green-800 dark:border-green-900 dark:bg-green-900/20 dark:text-green-300'
+                        : 'border-red-200 bg-red-50 text-red-700 dark:border-red-900 dark:bg-red-900/20 dark:text-red-300');
+
+                    resultTitle.textContent = title;
+                    resultBody.textContent  = body;
 
                     back.classList.remove('hidden');
                 }
 
+                function finish(payload) {
+                    if (payload.status === 'failed') {
+                        message.textContent = 'نصب متوقف شد.';
+
+                        show(
+                            'error',
+                            '✕ ' + (payload.error || 'نصب ناموفق بود.'),
+                            'فایل‌های نسخهٔ قبلی دست‌نخورده برگردانده شدند؛ چیزی روی سایت عوض نشده است.'
+                        );
+
+                        return;
+                    }
+
+                    message.textContent = 'تمام شد.';
+
+                    show(
+                        'success',
+                        '✓ ماژول ' + payload.module + ' نسخهٔ ' + payload.version + ' نصب شد.',
+                        'از ریکوئست بعدی بوت می‌شود؛ اگر بلافاصله اثری ندیدید یک‌بار صفحه را دوباره باز کنید.'
+                    );
+                }
+
                 function stop(text) {
-                    error.textContent = text;
-                    error.classList.remove('hidden');
-                    back.classList.remove('hidden');
+                    message.textContent = 'نصب نیمه‌کاره ماند.';
+
+                    show('error', '✕ ارتباط با سرور قطع شد', text);
                 }
 
                 function advance() {
