@@ -8,46 +8,45 @@
         $licenseValid = (bool) ($license['valid'] ?? false);
         $modules      = $catalogue['modules'] ?? [];
         $categories   = collect($modules)->pluck('category')->filter()->unique()->sort()->values();
-        $installable  = collect($modules)->filter(fn ($module) => ($module['available'] ?? false) && ($module['latest_version']['version'] ?? null))->count();
+
+        /** رنگ آیکون از نام ماژول می‌آید تا هر ماژول همیشه همان رنگ را داشته باشد. */
+        $palette = ['bg-blue-500', 'bg-emerald-500', 'bg-violet-500', 'bg-amber-500', 'bg-rose-500', 'bg-cyan-600', 'bg-indigo-500'];
     @endphp
 
-    <div class="flex flex-wrap items-start justify-between gap-4">
-        <div>
-            <p class="text-xl font-bold text-gray-800 dark:text-white">
-                مخزن ماژول‌ها
-            </p>
+    <div class="flex flex-wrap items-center justify-between gap-3">
+        <div class="flex flex-wrap items-center gap-x-3">
+            <p class="text-xl font-bold text-gray-800 dark:text-white">افزودن ماژول</p>
 
-            <p class="mt-1 text-xs leading-6 text-gray-500">
-                دامنه‌ای که به مخزن اعلام می‌شود: <code>{{ $domain }}</code> —
-                لایسنس مقید به همین دامنه است، پس اگر آدرس سایت عوض شد باید در مخزن هم به‌روز شود.
-            </p>
+            <a href="{{ route('admin.marketplace.index') }}" class="secondary-button !py-1 !text-xs">
+                ماژول‌های نصب‌شده
+            </a>
         </div>
 
         <div class="flex flex-wrap items-center gap-2.5">
-            <a href="{{ route('admin.marketplace.index') }}" class="secondary-button">
-                ماژول‌های نصب‌شده
-            </a>
+            <span class="text-xs text-gray-500">
+                دامنهٔ اعلام‌شده: <code>{{ $domain }}</code>
+            </span>
 
-            <a href="{{ route('admin.marketplace.repository', ['refresh' => 1]) }}" class="primary-button">
+            <a href="{{ route('admin.marketplace.repository', ['refresh' => 1]) }}" class="secondary-button !py-1 !text-xs">
                 تازه‌سازی فهرست
             </a>
         </div>
     </div>
 
     @if (session('success'))
-        <div class="mt-3.5 rounded border border-green-200 bg-green-50 p-4 text-sm text-green-800 dark:border-green-900 dark:bg-green-900/20 dark:text-green-300">
+        <div class="mt-3.5 rounded border-s-4 border-green-500 bg-green-50 p-4 text-sm text-green-800 dark:bg-green-900/20 dark:text-green-300">
             {{ session('success') }}
         </div>
     @endif
 
     @if (session('error'))
-        <div class="mt-3.5 rounded border border-red-200 bg-red-50 p-4 text-sm text-red-700 dark:border-red-900 dark:bg-red-900/20 dark:text-red-300">
+        <div class="mt-3.5 rounded border-s-4 border-red-500 bg-red-50 p-4 text-sm text-red-700 dark:bg-red-900/20 dark:text-red-300">
             {{ session('error') }}
         </div>
     @endif
 
     @if ($errors->any())
-        <div class="mt-3.5 rounded border border-red-200 bg-red-50 p-4 text-sm text-red-700 dark:border-red-900 dark:bg-red-900/20 dark:text-red-300">
+        <div class="mt-3.5 rounded border-s-4 border-red-500 bg-red-50 p-4 text-sm text-red-700 dark:bg-red-900/20 dark:text-red-300">
             <ul class="list-inside list-disc">
                 @foreach ($errors->all() as $error)
                     <li>{{ $error }}</li>
@@ -57,19 +56,19 @@
     @endif
 
     @if (! $configured)
-        <div class="mt-3.5 rounded border border-amber-200 bg-amber-50 p-4 text-sm text-amber-800 dark:border-amber-900 dark:bg-amber-900/20 dark:text-amber-300">
+        <div class="mt-3.5 rounded border-s-4 border-amber-500 bg-amber-50 p-4 text-sm text-amber-800 dark:bg-amber-900/20 dark:text-amber-300">
             آدرس مخزن تنظیم نشده است. در فایل <code>.env</code> کلید
             <code>MARKETPLACE_URL</code> را بگذارید؛ توکن لایسنس را می‌توانید با
             ثبت‌نام از همین صفحه بگیرید.
         </div>
     @elseif ($catalogue['error'])
-        <div class="mt-3.5 rounded border border-red-200 bg-red-50 p-4 text-sm text-red-700 dark:border-red-900 dark:bg-red-900/20 dark:text-red-300">
+        <div class="mt-3.5 rounded border-s-4 border-red-500 bg-red-50 p-4 text-sm text-red-700 dark:bg-red-900/20 dark:text-red-300">
             {{ $catalogue['error'] }}
         </div>
     @endif
 
     @if ($hasToken && $license)
-        <div class="mt-3.5 flex flex-wrap items-center justify-between gap-3 rounded bg-white p-4 text-sm dark:bg-gray-900">
+        <div class="mt-3.5 flex flex-wrap items-center justify-between gap-3 rounded bg-white px-4 py-3 text-sm dark:bg-gray-900">
             <div class="flex flex-wrap items-center gap-x-2 gap-y-1">
                 @if ($licenseValid)
                     <span class="label-active">لایسنس معتبر</span>
@@ -81,7 +80,6 @@
                             · تا {{ \Illuminate\Support\Carbon::parse($license['expires_at'])->format('Y-m-d') }}
                         @endif
                         · {{ empty($license['modules']) ? 'همهٔ ماژول‌ها' : implode('، ', $license['modules']) }}
-                        · {{ $installable }} ماژول قابل نصب
                     </span>
                 @else
                     <span class="label-canceled">لایسنس معتبر نیست</span>
@@ -93,12 +91,9 @@
             <div class="flex items-center gap-x-3 text-xs text-gray-500">
                 <span>
                     @if ($tokenFromEnv)
-                        توکن از <code>.env</code> خوانده می‌شود
+                        توکن از <code>.env</code>
                     @else
                         ثبت‌نام‌شده با {{ $credential?->email }}
-                        @if ($credential?->registered_at)
-                            · {{ $credential->registered_at->format('Y-m-d') }}
-                        @endif
                         @if ($credential?->domain && $credential->domain !== $domain)
                             · ⚠️ لایسنس روی <code>{{ $credential->domain }}</code> صادر شده، نه دامنهٔ فعلی
                         @endif
@@ -126,7 +121,7 @@
     @if ($configured && ! $licenseValid)
         <form method="POST"
               action="{{ route('admin.marketplace.register') }}"
-              class="mt-3.5 rounded border border-blue-100 bg-white p-5 dark:border-blue-900/40 dark:bg-gray-900">
+              class="mt-3.5 rounded border-s-4 border-blue-500 bg-white p-5 dark:bg-gray-900">
             @csrf
 
             <p class="text-base font-semibold text-gray-800 dark:text-white">
@@ -178,128 +173,142 @@
             فهرست ماژول‌های مخزن خالی است.
         </div>
     @else
-        {{-- جست‌وجو و فیلتر سمت مرورگر: فهرست چند ده‌تایی بدون آن‌ها اسکرول طولانی است. --}}
-        <div class="mt-3.5 flex flex-wrap items-center gap-2.5" id="repository-filters">
-            <input
-                type="search"
-                placeholder="جست‌وجو در نام، نامک یا توضیح…"
-                class="w-full max-w-xs rounded border px-3 py-2 text-sm dark:border-gray-800 dark:bg-gray-950"
-                data-search
-            >
-
-            <div class="flex flex-wrap items-center gap-1.5">
-                <button type="button" class="secondary-button !py-1 !text-xs" data-filter="all">همه</button>
+        <div class="mt-4 flex flex-wrap items-end justify-between gap-3" id="repository-toolbar">
+            <div class="flex flex-wrap items-center gap-x-1 text-sm text-gray-500">
+                <button type="button" data-filter="all"
+                        class="rounded px-2 py-1 font-semibold text-gray-800 hover:text-gray-800 dark:text-white">
+                    همه <span class="font-normal text-gray-400">({{ count($modules) }})</span>
+                </button>
 
                 @foreach ($categories as $category)
-                    <button type="button" class="secondary-button !py-1 !text-xs" data-filter="{{ $category }}">
+                    <span class="text-gray-300 dark:text-gray-700">|</span>
+
+                    <button type="button" data-filter="{{ $category }}"
+                            class="rounded px-2 py-1 hover:text-gray-800 dark:hover:text-white">
                         {{ $category }}
                     </button>
                 @endforeach
 
-                <button type="button" class="secondary-button !py-1 !text-xs" data-filter="__updates">
+                <span class="text-gray-300 dark:text-gray-700">|</span>
+
+                <button type="button" data-filter="__updates" class="rounded px-2 py-1 hover:text-gray-800 dark:hover:text-white">
                     به‌روزرسانی‌ها
                 </button>
             </div>
 
-            <span class="text-xs text-gray-500" data-count></span>
+            <input
+                type="search"
+                placeholder="جست‌وجوی ماژول…"
+                class="w-full max-w-xs rounded border px-3 py-1.5 text-sm dark:border-gray-800 dark:bg-gray-950"
+                data-search
+            >
         </div>
 
-        <div class="mt-3.5 grid gap-3.5 xl:grid-cols-2" id="repository-modules">
+        <div class="mt-2.5 grid gap-4 lg:grid-cols-2 2xl:grid-cols-3" id="repository-modules">
             @foreach ($modules as $module)
                 @php
                     $current  = $installed[$module['package_name']] ?? null;
                     $latest   = $module['latest_version']['version'] ?? null;
                     $outdated = $current && $latest && version_compare($latest, $current, '>');
+                    $color    = $palette[crc32($module['slug']) % count($palette)];
                 @endphp
 
                 <div
-                    class="flex flex-col rounded bg-white p-5 dark:bg-gray-900"
+                    class="flex flex-col rounded border bg-white dark:border-gray-800 dark:bg-gray-900"
                     data-module
                     data-category="{{ $module['category'] ?? '' }}"
                     data-updatable="{{ $outdated ? '1' : '0' }}"
                     data-haystack="{{ mb_strtolower($module['name'].' '.$module['package_name'].' '.$module['slug'].' '.($module['description'] ?? '')) }}"
                 >
-                    <div class="flex items-start justify-between gap-x-3">
-                        <div class="min-w-0">
-                            <p class="truncate text-base font-semibold text-gray-800 dark:text-white">
+                    <div class="flex items-start gap-x-3 p-4">
+                        {{-- آیکون نداریم، پس حرف اول نام روی مربع رنگی — مثل جای آیکون وردپرس. --}}
+                        <span class="flex h-12 w-12 shrink-0 items-center justify-center rounded text-lg font-bold text-white {{ $color }}">
+                            {{ mb_substr($module['name'], 0, 1) }}
+                        </span>
+
+                        <div class="min-w-0 flex-1">
+                            <p class="truncate font-semibold text-gray-800 dark:text-white">
                                 {{ $module['name'] }}
                             </p>
 
-                            <p class="mt-0.5 text-xs text-gray-400">
+                            <p class="mt-0.5 truncate text-xs text-gray-400">
+                                @if (! empty($module['author']))
+                                    توسط
+                                    @if (! empty($module['author_url']))
+                                        <a href="{{ $module['author_url'] }}" target="_blank" rel="noopener noreferrer"
+                                           class="text-blue-600 hover:underline">{{ $module['author'] }}</a>
+                                    @else
+                                        {{ $module['author'] }}
+                                    @endif
+                                    ·
+                                @endif
+
                                 <code>{{ $module['package_name'] }}</code>
                                 @if (! empty($module['category'])) · {{ $module['category'] }} @endif
                             </p>
                         </div>
 
-                        <div class="flex shrink-0 flex-wrap items-center justify-end gap-1.5">
-                            @if ($module['free'])
-                                <span class="label-info">رایگان</span>
+                        <div class="flex shrink-0 flex-col items-end gap-y-1.5">
+                            @if ($latest && $module['available'])
+                                <form method="POST" action="{{ route('admin.marketplace.repository.install', $module['slug']) }}">
+                                    @csrf
+
+                                    <button type="submit" class="{{ $outdated || ! $current ? 'primary-button' : 'secondary-button' }} !py-1 !text-xs">
+                                        @if ($outdated)
+                                            به‌روزرسانی
+                                        @elseif ($current)
+                                            نصب دوباره
+                                        @else
+                                            نصب
+                                        @endif
+                                    </button>
+                                </form>
                             @elseif (! $module['available'])
                                 <span class="label-pending">خارج از لایسنس</span>
                             @endif
 
                             @if ($outdated)
-                                <span class="label-processing">به‌روزرسانی موجود</span>
+                                <span class="text-[11px] text-blue-600">نسخهٔ {{ $latest }}</span>
                             @elseif ($current)
-                                <span class="label-active">نصب‌شده</span>
+                                <span class="text-[11px] text-green-600">نصب‌شده</span>
+                            @elseif ($module['free'])
+                                <span class="text-[11px] text-gray-400">رایگان</span>
                             @endif
                         </div>
                     </div>
 
-                    <p class="mt-2 text-xs leading-6 text-gray-500">
+                    <p
+                        class="px-4 text-xs leading-6 text-gray-500"
+                        style="display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;overflow:hidden"
+                        title="{{ $module['description'] }}"
+                    >
                         {{ $module['description'] ?: '—' }}
                     </p>
 
-                    @if ($latest)
-                        <div class="mt-3 grid grid-cols-2 gap-2 rounded bg-gray-50 p-3 text-xs dark:bg-gray-950/50 sm:grid-cols-3">
-                            <div>
-                                <span class="block text-gray-400">آخرین نسخهٔ سازگار</span>
-                                <span class="font-mono text-gray-700 dark:text-gray-200">{{ $latest }}</span>
-                            </div>
-
-                            <div>
-                                <span class="block text-gray-400">نصب‌شده</span>
-                                <span class="font-mono text-gray-700 dark:text-gray-200">{{ $current ?: '—' }}</span>
-                            </div>
-
-                            <div class="col-span-2 sm:col-span-1">
-                                <span class="block text-gray-400">پیش‌نیاز</span>
-                                <span class="text-gray-700 dark:text-gray-200">
-                                    {{ empty($module['latest_version']['requires']) ? '—' : implode('، ', $module['latest_version']['requires']) }}
-                                </span>
-                            </div>
-                        </div>
-
-                        @if (! empty($module['latest_version']['changelog']))
-                            <p class="mt-2 text-xs leading-5 text-gray-500">
-                                {{ $module['latest_version']['changelog'] }}
-                            </p>
-                        @endif
-                    @else
-                        <p class="mt-3 rounded bg-amber-50 p-2.5 text-xs leading-5 text-amber-700 dark:bg-amber-900/20 dark:text-amber-300">
-                            نسخهٔ سازگاری با بجیستو {{ \Webkul\Core\Core::BAGISTO_VERSION }} و
-                            PHP {{ PHP_VERSION }} منتشر نشده است.
+                    @if (! empty($module['latest_version']['changelog']))
+                        <p class="mt-2 px-4 text-xs leading-5 text-gray-400"
+                           style="display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden">
+                            تغییرات: {{ $module['latest_version']['changelog'] }}
                         </p>
                     @endif
 
-                    <div class="mt-auto flex items-center gap-x-2.5 pt-4">
-                        @if ($latest && $module['available'])
-                            <form method="POST" action="{{ route('admin.marketplace.repository.install', $module['slug']) }}">
-                                @csrf
+                    {{-- نوار اطلاعات ته کارت، همان‌جایی که وردپرس «آخرین به‌روزرسانی» را می‌گذارد. --}}
+                    <div class="mt-auto flex flex-wrap items-center gap-x-3 gap-y-1 border-t px-4 py-2.5 text-[11px] text-gray-500 dark:border-gray-800">
+                        @if ($latest)
+                            <span>آخرین نسخه: <span class="font-mono text-gray-700 dark:text-gray-200">{{ $latest }}</span></span>
 
-                                <button type="submit" class="{{ $outdated || ! $current ? 'primary-button' : 'secondary-button' }}">
-                                    @if ($outdated)
-                                        به‌روزرسانی به {{ $latest }}
-                                    @elseif ($current)
-                                        نصب دوباره
-                                    @else
-                                        نصب
-                                    @endif
-                                </button>
-                            </form>
-                        @elseif (! $module['available'])
-                            <span class="text-xs text-gray-500">
-                                برای نصب این ماژول باید در لایسنس شما باشد.
+                            @if ($current)
+                                <span class="text-gray-300 dark:text-gray-700">|</span>
+                                <span>نصب‌شده: <span class="font-mono text-gray-700 dark:text-gray-200">{{ $current }}</span></span>
+                            @endif
+
+                            @if (! empty($module['latest_version']['requires']))
+                                <span class="text-gray-300 dark:text-gray-700">|</span>
+                                <span>پیش‌نیاز: {{ implode('، ', $module['latest_version']['requires']) }}</span>
+                            @endif
+                        @else
+                            <span class="text-amber-600">
+                                نسخهٔ سازگار با بجیستو {{ \Webkul\Core\Core::BAGISTO_VERSION }} و PHP {{ PHP_VERSION }} ندارد
                             </span>
                         @endif
                     </div>
@@ -314,11 +323,11 @@
         @push('scripts')
             <script>
                 (function () {
-                    const filters = document.getElementById('repository-filters');
+                    const toolbar = document.getElementById('repository-toolbar');
                     const cards   = Array.from(document.querySelectorAll('[data-module]'));
-                    const search  = filters.querySelector('[data-search]');
-                    const counter = filters.querySelector('[data-count]');
+                    const search  = toolbar.querySelector('[data-search]');
                     const empty   = document.querySelector('[data-empty]');
+                    const tabs    = Array.from(toolbar.querySelectorAll('[data-filter]'));
 
                     let category = 'all';
 
@@ -328,30 +337,27 @@
                         let visible = 0;
 
                         cards.forEach(function (card) {
-                            const matchesTerm = ! term || card.dataset.haystack.includes(term);
-
                             const matchesCategory = category === 'all'
                                 || (category === '__updates' ? card.dataset.updatable === '1' : card.dataset.category === category);
 
-                            const show = matchesTerm && matchesCategory;
+                            const show = matchesCategory && (! term || card.dataset.haystack.includes(term));
 
                             card.classList.toggle('hidden', ! show);
 
                             visible += show ? 1 : 0;
                         });
 
-                        counter.textContent = visible + ' از ' + cards.length + ' ماژول';
-
                         empty.classList.toggle('hidden', visible > 0);
                     }
 
-                    filters.querySelectorAll('[data-filter]').forEach(function (button) {
-                        button.addEventListener('click', function () {
-                            category = button.dataset.filter;
+                    tabs.forEach(function (tab) {
+                        tab.addEventListener('click', function () {
+                            category = tab.dataset.filter;
 
-                            filters.querySelectorAll('[data-filter]').forEach(function (other) {
-                                other.classList.toggle('primary-button', other === button);
-                                other.classList.toggle('secondary-button', other !== button);
+                            tabs.forEach(function (other) {
+                                other.classList.toggle('font-semibold', other === tab);
+                                other.classList.toggle('text-gray-800', other === tab);
+                                other.classList.toggle('dark:text-white', other === tab);
                             });
 
                             apply();
@@ -359,8 +365,6 @@
                     });
 
                     search.addEventListener('input', apply);
-
-                    apply();
                 })();
             </script>
         @endpush

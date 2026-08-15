@@ -162,6 +162,9 @@ class ModuleRegistry
                 'alias'       => $data['alias'] ?? strtolower($name),
                 'description' => $data['description'] ?? '',
                 'version'     => $data['version'] ?? '1.0.0',
+                /** سازنده و صفحه‌اش — مثل «By …» در فهرست افزونه‌های وردپرس */
+                'author'      => $data['author'] ?? null,
+                'author_url'  => $data['author_url'] ?? null,
                 'priority'    => (int) ($data['priority'] ?? 100),
                 'requires'    => array_values((array) ($data['requires'] ?? [])),
                 'providers'   => array_values((array) ($data['providers'] ?? ['Modules\\'.$directory.'\\ModuleServiceProvider'])),

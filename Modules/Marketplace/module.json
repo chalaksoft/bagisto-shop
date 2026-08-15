@@ -2,8 +2,15 @@
     "name": "Marketplace",
     "alias": "marketplace",
     "description": "نصب، به‌روزرسانی، فعال/غیرفعال‌سازی و حذف ماژول‌ها از داخل پنل مدیریت — بدون SSH و بدون composer.",
-    "keywords": ["modules", "installer", "admin", "marketplace"],
+    "keywords": [
+        "modules",
+        "installer",
+        "admin",
+        "marketplace"
+    ],
     "version": "1.0.0",
+    "author": "چالاک سافت",
+    "author_url": "https://bagisto-shop.ir",
     "priority": 60,
     "providers": [
         "Modules\\Marketplace\\ModuleServiceProvider"
