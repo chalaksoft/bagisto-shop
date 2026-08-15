@@ -221,10 +221,12 @@
                     data-haystack="{{ mb_strtolower($module['name'].' '.$module['package_name'].' '.$module['slug'].' '.($module['description'] ?? '')) }}"
                 >
                     <div class="flex items-start gap-x-3 p-4">
-                        {{-- آیکون نداریم، پس حرف اول نام روی مربع رنگی — مثل جای آیکون وردپرس. --}}
-                        <span class="flex h-12 w-12 shrink-0 items-center justify-center rounded text-lg font-bold text-white {{ $color }}">
-                            {{ mb_substr($module['name'], 0, 1) }}
-                        </span>
+                        @include('Marketplace::admin._logo', [
+                            'src'   => $module['icon'] ?? null,
+                            'name'  => $module['name'],
+                            'size'  => 'h-12 w-12',
+                            'color' => $color,
+                        ])
 
                         <div class="min-w-0 flex-1">
                             <p class="truncate font-semibold text-gray-800 dark:text-white">

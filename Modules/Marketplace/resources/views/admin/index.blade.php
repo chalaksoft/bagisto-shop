@@ -4,6 +4,9 @@
     </x-slot>
 
     @php
+        /** رنگ لوگوی پیش‌فرض از نام ماژول می‌آید تا هر ماژول همیشه همان رنگ را داشته باشد. */
+        $palette = ['bg-blue-500', 'bg-emerald-500', 'bg-violet-500', 'bg-amber-500', 'bg-rose-500', 'bg-cyan-600', 'bg-indigo-500'];
+
         $rows = collect($modules)->map(function ($module, $name) use ($records, $updates, $protected, $locked) {
             $record = $records[$name] ?? null;
 
@@ -145,6 +148,15 @@
                             : 'border-s-transparent bg-gray-50 dark:bg-gray-950/40' }} {{ $row['update'] ? '!border-b-0' : '' }}"
                     >
                         <td class="p-4 align-top">
+                            <div class="flex items-start gap-x-2.5">
+                                @include('Marketplace::admin._logo', [
+                                    'src'   => $module['logo'] ?? null,
+                                    'name'  => $name,
+                                    'size'  => 'h-9 w-9',
+                                    'color' => $palette[crc32($name) % count($palette)],
+                                ])
+
+                                <div class="min-w-0">
                             <p class="font-semibold text-gray-800 dark:text-white">{{ $name }}</p>
 
                             {{-- لینک‌های عملیات زیر نام، دقیقاً جایی که وردپرس گذاشته. --}}
@@ -189,6 +201,8 @@
                                     <span class="text-gray-300 dark:text-gray-700">|</span>
                                     <span class="text-gray-400" title="فایل‌هایش مال این پروژه نیست">قفل</span>
                                 @endif
+                                    </div>
+                                </div>
                             </div>
                         </td>
 

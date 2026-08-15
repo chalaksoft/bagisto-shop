@@ -165,6 +165,8 @@ class ModuleRegistry
                 /** سازنده و صفحه‌اش — مثل «By …» در فهرست افزونه‌های وردپرس */
                 'author'      => $data['author'] ?? null,
                 'author_url'  => $data['author_url'] ?? null,
+                /** آدرس لوگو؛ خالی یعنی لوگوی پیش‌فرض نشان داده شود */
+                'logo'        => $data['logo'] ?? null,
                 'priority'    => (int) ($data['priority'] ?? 100),
                 'requires'    => array_values((array) ($data['requires'] ?? [])),
                 'providers'   => array_values((array) ($data['providers'] ?? ['Modules\\'.$directory.'\\ModuleServiceProvider'])),
